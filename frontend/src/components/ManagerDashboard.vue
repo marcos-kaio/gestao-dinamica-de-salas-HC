@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import AllocationDetailsModal from '../components/AllocationDetailsModal.vue'
 
-// Tipagem baseada na resposta do seu backend
 interface ResumoAmbulatorio {
   ambulatorio: string;
   total_salas: number;
@@ -11,7 +11,10 @@ interface ResumoAmbulatorio {
 
 const allocationSummary = ref<ResumoAmbulatorio[]>([])
 const isLoading = ref(false)
-const activeSpecialty = ref<string | null>(null)
+
+// Estado para controlar o modal de detalhes
+const isDetailsModalOpen = ref(false)
+const selectedAllocation = ref<ResumoAmbulatorio | null>(null)
 
 const API_URL = 'http://localhost:8000'
 
@@ -46,32 +49,26 @@ const handleGenerateAllocation = async () => {
   }
 }
 
-const toggleDetails = (specialtyName: string) => {
-  if (activeSpecialty.value === specialtyName) {
-    activeSpecialty.value = null
-  } else {
-    activeSpecialty.value = specialtyName
-  }
+// Função para abrir o modal com os detalhes
+const openDetails = (item: ResumoAmbulatorio) => {
+  selectedAllocation.value = item
+  isDetailsModalOpen.value = true
 }
 
-// --- Nova Função de Formatação ---
+const closeDetails = () => {
+  isDetailsModalOpen.value = false
+  setTimeout(() => selectedAllocation.value = null, 200) // Limpa após a animação
+}
+
+// Formatação para o Card (Preview)
 const formatLocation = (loc: string) => {
-  // O backend manda: "Bloco E - 0", "Bloco F - 2"
-  // Regex para capturar o Bloco (Grupo 1) e o Andar (Grupo 2)
   const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
-  
   if (match) {
-    const bloco = match[1] // Ex: "E"
-    const andar = match[2] // Ex: "0"
-    
-    // Lógica de conversão do andar
+    const bloco = match[1]
+    const andar = match[2]
     const andarFormatado = andar === '0' ? 'Térreo' : `${andar}º Andar`
-    
-    // Retorna no formato: "E Térreo", "F 2º Andar"
-    return `${bloco} ${andarFormatado}`
+    return `Bloco ${bloco} - ${andarFormatado}`
   }
-  
-  // Caso venha algo diferente (ex: "Bloco ANEXO"), retorna original
   return loc
 }
 </script>
@@ -79,13 +76,12 @@ const formatLocation = (loc: string) => {
 <template>
   <div class="min-h-screen bg-gray-50 p-8 font-sans text-gray-900">
     
-    <!-- Cabeçalho -->
     <header class="mb-10">
       <h1 class="text-3xl font-bold text-gray-900">Painel do Gestor</h1>
       <p class="text-gray-500 mt-1">Gerenciamento de Importação e Alocação de Salas (GDS)</p>
     </header>
 
-    <!-- Barra de Ações (Botões) -->
+    <!-- Barra de Ações -->
     <div class="mb-12 flex flex-wrap gap-4 rounded-xl bg-white p-6 shadow-sm border border-gray-100">
       <button 
         @click="handleImportSalas"
@@ -118,23 +114,19 @@ const formatLocation = (loc: string) => {
       </button>
     </div>
 
-    <!-- Resultados (Grid de Especialidades) -->
+    <!-- Resultados (Grid) -->
     <div v-if="allocationSummary.length > 0">
       <h2 class="text-xl font-semibold text-gray-800 mb-6">Resultado da Alocação por Especialidade</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Card da Especialidade -->
+        <!-- Card -->
         <div 
           v-for="item in allocationSummary" 
           :key="item.ambulatorio"
-          class="group relative flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
-          :class="{ 'ring-2 ring-blue-500 ring-offset-2': activeSpecialty === item.ambulatorio }"
+          @click="openDetails(item)"
+          class="group relative flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-lg hover:border-blue-300 cursor-pointer"
         >
-          <!-- Cabeçalho do Card (Clicável) -->
-          <div 
-            @click="toggleDetails(item.ambulatorio)"
-            class="cursor-pointer p-6 flex flex-col h-full"
-          >
+          <div class="p-6 flex flex-col h-full">
             <div class="flex items-start justify-between mb-4">
               <div class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                 {{ item.ambulatorio }}
@@ -147,39 +139,17 @@ const formatLocation = (loc: string) => {
               <ul class="text-sm text-gray-600 space-y-1">
                 <li v-for="loc in item.localizacao" :key="loc" class="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  <!-- Aplica a formatação aqui -->
                   {{ formatLocation(loc) }}
                 </li>
               </ul>
             </div>
             
-            <!-- Indicador de expandir -->
-            <div class="mt-4 flex justify-center pt-2 border-t border-gray-50">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                class="h-5 w-5 text-gray-300 transition-transform duration-300 group-hover:text-blue-500"
-                :class="{ 'rotate-180': activeSpecialty === item.ambulatorio }"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Lista Detalhada (Expandível) -->
-          <div 
-            v-if="activeSpecialty === item.ambulatorio" 
-            class="border-t border-gray-100 bg-gray-50 p-4 rounded-b-xl animate-fade-in-down"
-          >
-            <p class="text-xs font-semibold text-gray-500 mb-3">Salas Alocadas:</p>
-            <div class="grid grid-cols-2 gap-2">
-              <div 
-                v-for="sala in item.lista_salas" 
-                :key="sala"
-                class="bg-white border border-gray-200 rounded px-2 py-1.5 text-center text-sm font-medium text-gray-700"
-              >
-                {{ sala }}
-              </div>
+            <!-- Ícone indicando ação de ver mais -->
+            <div class="mt-4 flex justify-end pt-2 border-t border-gray-50">
+              <span class="text-xs font-medium text-blue-600 group-hover:underline flex items-center gap-1">
+                Ver detalhes
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </span>
             </div>
           </div>
         </div>
@@ -195,21 +165,12 @@ const formatLocation = (loc: string) => {
       <p class="text-gray-500 max-w-md mt-2">Importe as salas e as grades médicas, depois clique em "Gerar Alocação" para visualizar o planejamento.</p>
     </div>
 
+    <!-- Modal de Detalhes -->
+    <AllocationDetailsModal 
+      :is-open="isDetailsModalOpen"
+      :data="selectedAllocation"
+      @close="closeDetails"
+    />
+
   </div>
 </template>
-
-<style scoped>
-.animate-fade-in-down {
-  animation: fadeInDown 0.3s ease-out;
-}
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>
