@@ -1,0 +1,29 @@
+# General
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Byte-compiled / Optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# Banco de Dados Local (SQLite)
+*.db
+*.sqlite3
+backend/app/gds_poc.db
+
+# Distribuição / Build
+build/
+dist/
+*.egg-info/
+
+# Pytest
+.pytest_cache/

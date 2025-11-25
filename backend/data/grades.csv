@@ -1,0 +1,769 @@
+medico_nome,especialidade,dia_semana,turno,tipo_recurso
+Dr(a). Carvalho (Ped),Pediatria,SEG,MANHA,DOCENTE
+Dr(a). Oliveira (Ped),Pediatria,SEG,MANHA,DOCENTE
+Dr(a). Rodrigues (Ped),Pediatria,SEG,MANHA,DOCENTE
+Residente Ped 1,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 2,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 3,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 4,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 5,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 6,Pediatria,SEG,MANHA,RESIDENTE
+Residente Ped 7,Pediatria,SEG,MANHA,RESIDENTE
+Dr(a). Rodrigues (Gin),Ginecologia/ Obstetrícia,SEG,MANHA,DOCENTE
+Dr(a). Rodrigues (Gin),Ginecologia/ Obstetrícia,SEG,MANHA,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,SEG,MANHA,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,SEG,MANHA,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,SEG,MANHA,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,SEG,MANHA,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,SEG,MANHA,RESIDENTE
+Dr(a). Santos (Ort),Ortopedia,SEG,MANHA,DOCENTE
+Residente Ort 1,Ortopedia,SEG,MANHA,RESIDENTE
+Residente Ort 2,Ortopedia,SEG,MANHA,RESIDENTE
+Residente Ort 3,Ortopedia,SEG,MANHA,RESIDENTE
+Dr(a). Santos (Neu),Neurologia,SEG,MANHA,DOCENTE
+Dr(a). Ferreira (Neu),Neurologia,SEG,MANHA,DOCENTE
+Residente Neu 1,Neurologia,SEG,MANHA,RESIDENTE
+Residente Neu 2,Neurologia,SEG,MANHA,RESIDENTE
+Residente Neu 3,Neurologia,SEG,MANHA,RESIDENTE
+Residente Neu 4,Neurologia,SEG,MANHA,RESIDENTE
+Residente Neu 5,Neurologia,SEG,MANHA,RESIDENTE
+Dr(a). Mendes (Car),Cardiologia,SEG,MANHA,DOCENTE
+Residente Car 1,Cardiologia,SEG,MANHA,RESIDENTE
+Residente Car 2,Cardiologia,SEG,MANHA,RESIDENTE
+Residente Car 3,Cardiologia,SEG,MANHA,RESIDENTE
+Dr(a). Oliveira (Oft),Oftalmo,SEG,MANHA,DOCENTE
+Residente Oft 1,Oftalmo,SEG,MANHA,RESIDENTE
+Residente Oft 2,Oftalmo,SEG,MANHA,RESIDENTE
+Residente Oft 3,Oftalmo,SEG,MANHA,RESIDENTE
+Residente Oft 4,Oftalmo,SEG,MANHA,RESIDENTE
+Dr(a). Costa (Der),Dermatologia,SEG,MANHA,DOCENTE
+Residente Der 1,Dermatologia,SEG,MANHA,RESIDENTE
+Residente Der 2,Dermatologia,SEG,MANHA,RESIDENTE
+Dr(a). Ferreira (Psi),Psiquiatria,SEG,MANHA,DOCENTE
+Residente Psi 1,Psiquiatria,SEG,MANHA,RESIDENTE
+Residente Psi 2,Psiquiatria,SEG,MANHA,RESIDENTE
+Dr(a). Nascimento (Clí),Clínica Médica/ Geriatria/ Dor,SEG,MANHA,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,SEG,MANHA,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,SEG,MANHA,RESIDENTE
+Residente Clí 3,Clínica Médica/ Geriatria/ Dor,SEG,MANHA,RESIDENTE
+Dr(a). Almeida (Gas),Gastro,SEG,MANHA,DOCENTE
+Residente Gas 1,Gastro,SEG,MANHA,RESIDENTE
+Dr(a). Lima (Reu),Reumatologia,SEG,MANHA,DOCENTE
+Residente Reu 1,Reumatologia,SEG,MANHA,RESIDENTE
+Residente Reu 2,Reumatologia,SEG,MANHA,RESIDENTE
+Dr(a). Silva (Oto),Otorrino,SEG,MANHA,DOCENTE
+Residente Oto 1,Otorrino,SEG,MANHA,RESIDENTE
+Residente Oto 2,Otorrino,SEG,MANHA,RESIDENTE
+Dr(a). Carvalho (Pne),Pneumologia,SEG,MANHA,DOCENTE
+Residente Pne 1,Pneumologia,SEG,MANHA,RESIDENTE
+Residente Pne 2,Pneumologia,SEG,MANHA,RESIDENTE
+Dr(a). Nascimento (Uro),Urologia,SEG,MANHA,DOCENTE
+Residente Uro 1,Urologia,SEG,MANHA,RESIDENTE
+Dr(a). Almeida (Onc),Oncologia,SEG,MANHA,DOCENTE
+Residente Onc 1,Oncologia,SEG,MANHA,RESIDENTE
+Dr(a). Mendes (Nef),Nefrologia,SEG,MANHA,DOCENTE
+Residente Nef 1,Nefrologia,SEG,MANHA,RESIDENTE
+Dr(a). Souza (End),Endocrinologia,SEG,MANHA,DOCENTE
+Dr(a). Oliveira (Cir),Cirurgia Geral,SEG,MANHA,DOCENTE
+Dr(a). Souza (Inf),Infectologia,SEG,MANHA,DOCENTE
+Dr(a). Rodrigues (Vas),Vascular,SEG,MANHA,DOCENTE
+Dr(a). Santos (Hem),Hematologia,SEG,MANHA,DOCENTE
+Residente Hem 1,Hematologia,SEG,MANHA,RESIDENTE
+Dr(a). Lima (Plá),Plástica,SEG,MANHA,DOCENTE
+Dr(a). Oliveira (Col),Colposcopia,SEG,MANHA,DOCENTE
+Dr(a). Almeida (Esp),Espaço Trans,SEG,MANHA,DOCENTE
+Dr(a). Souza (Ter),Terapia Familiar,SEG,MANHA,DOCENTE
+Dr(a). Silva (Fon),Fonoaudiologia,SEG,MANHA,DOCENTE
+Dr(a). Carvalho (Pré),Pré Operatorio,SEG,MANHA,DOCENTE
+Dr(a). Santos (Sal),Sala de Vacina,SEG,MANHA,DOCENTE
+Dr(a). Alves (Pue),Puericultura,SEG,MANHA,DOCENTE
+Dr(a). Alves (Ped),Pediatria,SEG,TARDE,DOCENTE
+Dr(a). Nascimento (Ped),Pediatria,SEG,TARDE,DOCENTE
+Residente Ped 1,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 2,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 3,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 4,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 5,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 6,Pediatria,SEG,TARDE,RESIDENTE
+Residente Ped 7,Pediatria,SEG,TARDE,RESIDENTE
+Dr(a). Lima (Gin),Ginecologia/ Obstetrícia,SEG,TARDE,DOCENTE
+Dr(a). Oliveira (Gin),Ginecologia/ Obstetrícia,SEG,TARDE,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,SEG,TARDE,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,SEG,TARDE,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,SEG,TARDE,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,SEG,TARDE,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,SEG,TARDE,RESIDENTE
+Dr(a). Silva (Ort),Ortopedia,SEG,TARDE,DOCENTE
+Residente Ort 1,Ortopedia,SEG,TARDE,RESIDENTE
+Residente Ort 2,Ortopedia,SEG,TARDE,RESIDENTE
+Residente Ort 3,Ortopedia,SEG,TARDE,RESIDENTE
+Residente Ort 4,Ortopedia,SEG,TARDE,RESIDENTE
+Residente Ort 5,Ortopedia,SEG,TARDE,RESIDENTE
+Dr(a). Alves (Neu),Neurologia,SEG,TARDE,DOCENTE
+Dr(a). Almeida (Neu),Neurologia,SEG,TARDE,DOCENTE
+Residente Neu 1,Neurologia,SEG,TARDE,RESIDENTE
+Residente Neu 2,Neurologia,SEG,TARDE,RESIDENTE
+Residente Neu 3,Neurologia,SEG,TARDE,RESIDENTE
+Residente Neu 4,Neurologia,SEG,TARDE,RESIDENTE
+Residente Neu 5,Neurologia,SEG,TARDE,RESIDENTE
+Dr(a). Alves (Car),Cardiologia,SEG,TARDE,DOCENTE
+Residente Car 1,Cardiologia,SEG,TARDE,RESIDENTE
+Residente Car 2,Cardiologia,SEG,TARDE,RESIDENTE
+Residente Car 3,Cardiologia,SEG,TARDE,RESIDENTE
+Dr(a). Carvalho (Oft),Oftalmo,SEG,TARDE,DOCENTE
+Residente Oft 1,Oftalmo,SEG,TARDE,RESIDENTE
+Residente Oft 2,Oftalmo,SEG,TARDE,RESIDENTE
+Residente Oft 3,Oftalmo,SEG,TARDE,RESIDENTE
+Dr(a). Ribeiro (Der),Dermatologia,SEG,TARDE,DOCENTE
+Residente Der 1,Dermatologia,SEG,TARDE,RESIDENTE
+Residente Der 2,Dermatologia,SEG,TARDE,RESIDENTE
+Dr(a). Silva (Psi),Psiquiatria,SEG,TARDE,DOCENTE
+Residente Psi 1,Psiquiatria,SEG,TARDE,RESIDENTE
+Residente Psi 2,Psiquiatria,SEG,TARDE,RESIDENTE
+Dr(a). Almeida (Clí),Clínica Médica/ Geriatria/ Dor,SEG,TARDE,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,SEG,TARDE,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,SEG,TARDE,RESIDENTE
+Dr(a). Rodrigues (Gas),Gastro,SEG,TARDE,DOCENTE
+Residente Gas 1,Gastro,SEG,TARDE,RESIDENTE
+Dr(a). Ribeiro (Reu),Reumatologia,SEG,TARDE,DOCENTE
+Residente Reu 1,Reumatologia,SEG,TARDE,RESIDENTE
+Dr(a). Silva (Oto),Otorrino,SEG,TARDE,DOCENTE
+Residente Oto 1,Otorrino,SEG,TARDE,RESIDENTE
+Residente Oto 2,Otorrino,SEG,TARDE,RESIDENTE
+Dr(a). Ribeiro (Pne),Pneumologia,SEG,TARDE,DOCENTE
+Residente Pne 1,Pneumologia,SEG,TARDE,RESIDENTE
+Dr(a). Lima (Uro),Urologia,SEG,TARDE,DOCENTE
+Residente Uro 1,Urologia,SEG,TARDE,RESIDENTE
+Dr(a). Rodrigues (Onc),Oncologia,SEG,TARDE,DOCENTE
+Residente Onc 1,Oncologia,SEG,TARDE,RESIDENTE
+Residente Onc 2,Oncologia,SEG,TARDE,RESIDENTE
+Dr(a). Souza (Nef),Nefrologia,SEG,TARDE,DOCENTE
+Dr(a). Oliveira (End),Endocrinologia,SEG,TARDE,DOCENTE
+Dr(a). Almeida (Cir),Cirurgia Geral,SEG,TARDE,DOCENTE
+Dr(a). Lima (Inf),Infectologia,SEG,TARDE,DOCENTE
+Residente Inf 1,Infectologia,SEG,TARDE,RESIDENTE
+Dr(a). Santos (Vas),Vascular,SEG,TARDE,DOCENTE
+Residente Vas 1,Vascular,SEG,TARDE,RESIDENTE
+Dr(a). Lima (Hem),Hematologia,SEG,TARDE,DOCENTE
+Residente Hem 1,Hematologia,SEG,TARDE,RESIDENTE
+Dr(a). Santos (Plá),Plástica,SEG,TARDE,DOCENTE
+Dr(a). Rodrigues (Col),Colposcopia,SEG,TARDE,DOCENTE
+Dr(a). Silva (Esp),Espaço Trans,SEG,TARDE,DOCENTE
+Dr(a). Lima (Ter),Terapia Familiar,SEG,TARDE,DOCENTE
+Dr(a). Ribeiro (Fon),Fonoaudiologia,SEG,TARDE,DOCENTE
+Dr(a). Rodrigues (Pré),Pré Operatorio,SEG,TARDE,DOCENTE
+Dr(a). Santos (Sal),Sala de Vacina,SEG,TARDE,DOCENTE
+Dr(a). Silva (Pue),Puericultura,SEG,TARDE,DOCENTE
+Dr(a). Pereira (Ped),Pediatria,TER,MANHA,DOCENTE
+Dr(a). Ribeiro (Ped),Pediatria,TER,MANHA,DOCENTE
+Residente Ped 1,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 2,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 3,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 4,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 5,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 6,Pediatria,TER,MANHA,RESIDENTE
+Residente Ped 7,Pediatria,TER,MANHA,RESIDENTE
+Dr(a). Rodrigues (Gin),Ginecologia/ Obstetrícia,TER,MANHA,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,TER,MANHA,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,TER,MANHA,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,TER,MANHA,RESIDENTE
+Dr(a). Lima (Ort),Ortopedia,TER,MANHA,DOCENTE
+Dr(a). Santos (Ort),Ortopedia,TER,MANHA,DOCENTE
+Residente Ort 1,Ortopedia,TER,MANHA,RESIDENTE
+Residente Ort 2,Ortopedia,TER,MANHA,RESIDENTE
+Residente Ort 3,Ortopedia,TER,MANHA,RESIDENTE
+Residente Ort 4,Ortopedia,TER,MANHA,RESIDENTE
+Residente Ort 5,Ortopedia,TER,MANHA,RESIDENTE
+Dr(a). Oliveira (Neu),Neurologia,TER,MANHA,DOCENTE
+Dr(a). Santos (Neu),Neurologia,TER,MANHA,DOCENTE
+Residente Neu 1,Neurologia,TER,MANHA,RESIDENTE
+Residente Neu 2,Neurologia,TER,MANHA,RESIDENTE
+Residente Neu 3,Neurologia,TER,MANHA,RESIDENTE
+Residente Neu 4,Neurologia,TER,MANHA,RESIDENTE
+Residente Neu 5,Neurologia,TER,MANHA,RESIDENTE
+Dr(a). Pereira (Car),Cardiologia,TER,MANHA,DOCENTE
+Residente Car 1,Cardiologia,TER,MANHA,RESIDENTE
+Residente Car 2,Cardiologia,TER,MANHA,RESIDENTE
+Residente Car 3,Cardiologia,TER,MANHA,RESIDENTE
+Dr(a). Alves (Oft),Oftalmo,TER,MANHA,DOCENTE
+Residente Oft 1,Oftalmo,TER,MANHA,RESIDENTE
+Residente Oft 2,Oftalmo,TER,MANHA,RESIDENTE
+Residente Oft 3,Oftalmo,TER,MANHA,RESIDENTE
+Residente Oft 4,Oftalmo,TER,MANHA,RESIDENTE
+Dr(a). Silva (Der),Dermatologia,TER,MANHA,DOCENTE
+Residente Der 1,Dermatologia,TER,MANHA,RESIDENTE
+Residente Der 2,Dermatologia,TER,MANHA,RESIDENTE
+Residente Der 3,Dermatologia,TER,MANHA,RESIDENTE
+Dr(a). Oliveira (Psi),Psiquiatria,TER,MANHA,DOCENTE
+Residente Psi 1,Psiquiatria,TER,MANHA,RESIDENTE
+Residente Psi 2,Psiquiatria,TER,MANHA,RESIDENTE
+Residente Psi 3,Psiquiatria,TER,MANHA,RESIDENTE
+Dr(a). Lima (Clí),Clínica Médica/ Geriatria/ Dor,TER,MANHA,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,TER,MANHA,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,TER,MANHA,RESIDENTE
+Dr(a). Ribeiro (Gas),Gastro,TER,MANHA,DOCENTE
+Residente Gas 1,Gastro,TER,MANHA,RESIDENTE
+Dr(a). Carvalho (Reu),Reumatologia,TER,MANHA,DOCENTE
+Residente Reu 1,Reumatologia,TER,MANHA,RESIDENTE
+Residente Reu 2,Reumatologia,TER,MANHA,RESIDENTE
+Dr(a). Rodrigues (Oto),Otorrino,TER,MANHA,DOCENTE
+Residente Oto 1,Otorrino,TER,MANHA,RESIDENTE
+Dr(a). Santos (Pne),Pneumologia,TER,MANHA,DOCENTE
+Residente Pne 1,Pneumologia,TER,MANHA,RESIDENTE
+Residente Pne 2,Pneumologia,TER,MANHA,RESIDENTE
+Dr(a). Alves (Uro),Urologia,TER,MANHA,DOCENTE
+Residente Uro 1,Urologia,TER,MANHA,RESIDENTE
+Residente Uro 2,Urologia,TER,MANHA,RESIDENTE
+Dr(a). Costa (Onc),Oncologia,TER,MANHA,DOCENTE
+Residente Onc 1,Oncologia,TER,MANHA,RESIDENTE
+Residente Onc 2,Oncologia,TER,MANHA,RESIDENTE
+Dr(a). Costa (Nef),Nefrologia,TER,MANHA,DOCENTE
+Residente Nef 1,Nefrologia,TER,MANHA,RESIDENTE
+Dr(a). Silva (End),Endocrinologia,TER,MANHA,DOCENTE
+Dr(a). Pereira (Cir),Cirurgia Geral,TER,MANHA,DOCENTE
+Residente Cir 1,Cirurgia Geral,TER,MANHA,RESIDENTE
+Dr(a). Santos (Inf),Infectologia,TER,MANHA,DOCENTE
+Dr(a). Souza (Vas),Vascular,TER,MANHA,DOCENTE
+Residente Vas 1,Vascular,TER,MANHA,RESIDENTE
+Dr(a). Silva (Hem),Hematologia,TER,MANHA,DOCENTE
+Dr(a). Souza (Plá),Plástica,TER,MANHA,DOCENTE
+Dr(a). Oliveira (Col),Colposcopia,TER,MANHA,DOCENTE
+Dr(a). Almeida (Esp),Espaço Trans,TER,MANHA,DOCENTE
+Dr(a). Pereira (Ter),Terapia Familiar,TER,MANHA,DOCENTE
+Dr(a). Alves (Fon),Fonoaudiologia,TER,MANHA,DOCENTE
+Dr(a). Ribeiro (Pré),Pré Operatorio,TER,MANHA,DOCENTE
+Dr(a). Souza (Sal),Sala de Vacina,TER,MANHA,DOCENTE
+Dr(a). Ribeiro (Pue),Puericultura,TER,MANHA,DOCENTE
+Dr(a). Santos (Ped),Pediatria,TER,TARDE,DOCENTE
+Dr(a). Rodrigues (Ped),Pediatria,TER,TARDE,DOCENTE
+Residente Ped 1,Pediatria,TER,TARDE,RESIDENTE
+Residente Ped 2,Pediatria,TER,TARDE,RESIDENTE
+Residente Ped 3,Pediatria,TER,TARDE,RESIDENTE
+Residente Ped 4,Pediatria,TER,TARDE,RESIDENTE
+Residente Ped 5,Pediatria,TER,TARDE,RESIDENTE
+Residente Ped 6,Pediatria,TER,TARDE,RESIDENTE
+Dr(a). Ribeiro (Gin),Ginecologia/ Obstetrícia,TER,TARDE,DOCENTE
+Dr(a). Alves (Gin),Ginecologia/ Obstetrícia,TER,TARDE,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Residente Gin 6,Ginecologia/ Obstetrícia,TER,TARDE,RESIDENTE
+Dr(a). Carvalho (Ort),Ortopedia,TER,TARDE,DOCENTE
+Residente Ort 1,Ortopedia,TER,TARDE,RESIDENTE
+Residente Ort 2,Ortopedia,TER,TARDE,RESIDENTE
+Residente Ort 3,Ortopedia,TER,TARDE,RESIDENTE
+Dr(a). Rodrigues (Neu),Neurologia,TER,TARDE,DOCENTE
+Residente Neu 1,Neurologia,TER,TARDE,RESIDENTE
+Residente Neu 2,Neurologia,TER,TARDE,RESIDENTE
+Residente Neu 3,Neurologia,TER,TARDE,RESIDENTE
+Residente Neu 4,Neurologia,TER,TARDE,RESIDENTE
+Dr(a). Ribeiro (Car),Cardiologia,TER,TARDE,DOCENTE
+Residente Car 1,Cardiologia,TER,TARDE,RESIDENTE
+Residente Car 2,Cardiologia,TER,TARDE,RESIDENTE
+Residente Car 3,Cardiologia,TER,TARDE,RESIDENTE
+Dr(a). Alves (Oft),Oftalmo,TER,TARDE,DOCENTE
+Residente Oft 1,Oftalmo,TER,TARDE,RESIDENTE
+Residente Oft 2,Oftalmo,TER,TARDE,RESIDENTE
+Dr(a). Rodrigues (Der),Dermatologia,TER,TARDE,DOCENTE
+Residente Der 1,Dermatologia,TER,TARDE,RESIDENTE
+Residente Der 2,Dermatologia,TER,TARDE,RESIDENTE
+Dr(a). Mendes (Psi),Psiquiatria,TER,TARDE,DOCENTE
+Residente Psi 1,Psiquiatria,TER,TARDE,RESIDENTE
+Residente Psi 2,Psiquiatria,TER,TARDE,RESIDENTE
+Residente Psi 3,Psiquiatria,TER,TARDE,RESIDENTE
+Dr(a). Carvalho (Clí),Clínica Médica/ Geriatria/ Dor,TER,TARDE,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,TER,TARDE,RESIDENTE
+Dr(a). Ferreira (Gas),Gastro,TER,TARDE,DOCENTE
+Residente Gas 1,Gastro,TER,TARDE,RESIDENTE
+Dr(a). Carvalho (Reu),Reumatologia,TER,TARDE,DOCENTE
+Residente Reu 1,Reumatologia,TER,TARDE,RESIDENTE
+Dr(a). Rodrigues (Oto),Otorrino,TER,TARDE,DOCENTE
+Residente Oto 1,Otorrino,TER,TARDE,RESIDENTE
+Dr(a). Almeida (Pne),Pneumologia,TER,TARDE,DOCENTE
+Residente Pne 1,Pneumologia,TER,TARDE,RESIDENTE
+Dr(a). Almeida (Uro),Urologia,TER,TARDE,DOCENTE
+Residente Uro 1,Urologia,TER,TARDE,RESIDENTE
+Residente Uro 2,Urologia,TER,TARDE,RESIDENTE
+Dr(a). Ribeiro (Onc),Oncologia,TER,TARDE,DOCENTE
+Residente Onc 1,Oncologia,TER,TARDE,RESIDENTE
+Residente Onc 2,Oncologia,TER,TARDE,RESIDENTE
+Dr(a). Costa (Nef),Nefrologia,TER,TARDE,DOCENTE
+Dr(a). Nascimento (End),Endocrinologia,TER,TARDE,DOCENTE
+Residente End 1,Endocrinologia,TER,TARDE,RESIDENTE
+Dr(a). Alves (Cir),Cirurgia Geral,TER,TARDE,DOCENTE
+Residente Cir 1,Cirurgia Geral,TER,TARDE,RESIDENTE
+Dr(a). Alves (Inf),Infectologia,TER,TARDE,DOCENTE
+Residente Inf 1,Infectologia,TER,TARDE,RESIDENTE
+Dr(a). Alves (Vas),Vascular,TER,TARDE,DOCENTE
+Residente Vas 1,Vascular,TER,TARDE,RESIDENTE
+Dr(a). Lima (Hem),Hematologia,TER,TARDE,DOCENTE
+Dr(a). Pereira (Plá),Plástica,TER,TARDE,DOCENTE
+Dr(a). Costa (Col),Colposcopia,TER,TARDE,DOCENTE
+Dr(a). Oliveira (Esp),Espaço Trans,TER,TARDE,DOCENTE
+Dr(a). Silva (Ter),Terapia Familiar,TER,TARDE,DOCENTE
+Dr(a). Alves (Fon),Fonoaudiologia,TER,TARDE,DOCENTE
+Dr(a). Almeida (Pré),Pré Operatorio,TER,TARDE,DOCENTE
+Dr(a). Nascimento (Sal),Sala de Vacina,TER,TARDE,DOCENTE
+Dr(a). Souza (Pue),Puericultura,TER,TARDE,DOCENTE
+Dr(a). Ferreira (Ped),Pediatria,QUA,MANHA,DOCENTE
+Dr(a). Almeida (Ped),Pediatria,QUA,MANHA,DOCENTE
+Residente Ped 1,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 2,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 3,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 4,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 5,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 6,Pediatria,QUA,MANHA,RESIDENTE
+Residente Ped 7,Pediatria,QUA,MANHA,RESIDENTE
+Dr(a). Costa (Gin),Ginecologia/ Obstetrícia,QUA,MANHA,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,QUA,MANHA,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,QUA,MANHA,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,QUA,MANHA,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,QUA,MANHA,RESIDENTE
+Dr(a). Rodrigues (Ort),Ortopedia,QUA,MANHA,DOCENTE
+Dr(a). Oliveira (Ort),Ortopedia,QUA,MANHA,DOCENTE
+Residente Ort 1,Ortopedia,QUA,MANHA,RESIDENTE
+Residente Ort 2,Ortopedia,QUA,MANHA,RESIDENTE
+Residente Ort 3,Ortopedia,QUA,MANHA,RESIDENTE
+Residente Ort 4,Ortopedia,QUA,MANHA,RESIDENTE
+Residente Ort 5,Ortopedia,QUA,MANHA,RESIDENTE
+Dr(a). Pereira (Neu),Neurologia,QUA,MANHA,DOCENTE
+Residente Neu 1,Neurologia,QUA,MANHA,RESIDENTE
+Residente Neu 2,Neurologia,QUA,MANHA,RESIDENTE
+Residente Neu 3,Neurologia,QUA,MANHA,RESIDENTE
+Residente Neu 4,Neurologia,QUA,MANHA,RESIDENTE
+Residente Neu 5,Neurologia,QUA,MANHA,RESIDENTE
+Dr(a). Lima (Car),Cardiologia,QUA,MANHA,DOCENTE
+Residente Car 1,Cardiologia,QUA,MANHA,RESIDENTE
+Residente Car 2,Cardiologia,QUA,MANHA,RESIDENTE
+Residente Car 3,Cardiologia,QUA,MANHA,RESIDENTE
+Residente Car 4,Cardiologia,QUA,MANHA,RESIDENTE
+Dr(a). Nascimento (Oft),Oftalmo,QUA,MANHA,DOCENTE
+Residente Oft 1,Oftalmo,QUA,MANHA,RESIDENTE
+Residente Oft 2,Oftalmo,QUA,MANHA,RESIDENTE
+Dr(a). Rodrigues (Der),Dermatologia,QUA,MANHA,DOCENTE
+Residente Der 1,Dermatologia,QUA,MANHA,RESIDENTE
+Residente Der 2,Dermatologia,QUA,MANHA,RESIDENTE
+Residente Der 3,Dermatologia,QUA,MANHA,RESIDENTE
+Dr(a). Almeida (Psi),Psiquiatria,QUA,MANHA,DOCENTE
+Residente Psi 1,Psiquiatria,QUA,MANHA,RESIDENTE
+Dr(a). Lima (Clí),Clínica Médica/ Geriatria/ Dor,QUA,MANHA,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,QUA,MANHA,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,QUA,MANHA,RESIDENTE
+Dr(a). Pereira (Gas),Gastro,QUA,MANHA,DOCENTE
+Residente Gas 1,Gastro,QUA,MANHA,RESIDENTE
+Residente Gas 2,Gastro,QUA,MANHA,RESIDENTE
+Dr(a). Ribeiro (Reu),Reumatologia,QUA,MANHA,DOCENTE
+Residente Reu 1,Reumatologia,QUA,MANHA,RESIDENTE
+Dr(a). Costa (Oto),Otorrino,QUA,MANHA,DOCENTE
+Residente Oto 1,Otorrino,QUA,MANHA,RESIDENTE
+Dr(a). Santos (Pne),Pneumologia,QUA,MANHA,DOCENTE
+Residente Pne 1,Pneumologia,QUA,MANHA,RESIDENTE
+Dr(a). Ribeiro (Uro),Urologia,QUA,MANHA,DOCENTE
+Residente Uro 1,Urologia,QUA,MANHA,RESIDENTE
+Dr(a). Costa (Onc),Oncologia,QUA,MANHA,DOCENTE
+Residente Onc 1,Oncologia,QUA,MANHA,RESIDENTE
+Dr(a). Carvalho (Nef),Nefrologia,QUA,MANHA,DOCENTE
+Residente Nef 1,Nefrologia,QUA,MANHA,RESIDENTE
+Dr(a). Mendes (End),Endocrinologia,QUA,MANHA,DOCENTE
+Dr(a). Costa (Cir),Cirurgia Geral,QUA,MANHA,DOCENTE
+Dr(a). Silva (Inf),Infectologia,QUA,MANHA,DOCENTE
+Residente Inf 1,Infectologia,QUA,MANHA,RESIDENTE
+Dr(a). Souza (Vas),Vascular,QUA,MANHA,DOCENTE
+Dr(a). Oliveira (Hem),Hematologia,QUA,MANHA,DOCENTE
+Residente Hem 1,Hematologia,QUA,MANHA,RESIDENTE
+Dr(a). Oliveira (Plá),Plástica,QUA,MANHA,DOCENTE
+Dr(a). Ribeiro (Col),Colposcopia,QUA,MANHA,DOCENTE
+Dr(a). Lima (Esp),Espaço Trans,QUA,MANHA,DOCENTE
+Dr(a). Costa (Ter),Terapia Familiar,QUA,MANHA,DOCENTE
+Dr(a). Lima (Fon),Fonoaudiologia,QUA,MANHA,DOCENTE
+Dr(a). Costa (Pré),Pré Operatorio,QUA,MANHA,DOCENTE
+Dr(a). Pereira (Sal),Sala de Vacina,QUA,MANHA,DOCENTE
+Dr(a). Ferreira (Pue),Puericultura,QUA,MANHA,DOCENTE
+Dr(a). Carvalho (Ped),Pediatria,QUA,TARDE,DOCENTE
+Dr(a). Pereira (Ped),Pediatria,QUA,TARDE,DOCENTE
+Residente Ped 1,Pediatria,QUA,TARDE,RESIDENTE
+Residente Ped 2,Pediatria,QUA,TARDE,RESIDENTE
+Residente Ped 3,Pediatria,QUA,TARDE,RESIDENTE
+Residente Ped 4,Pediatria,QUA,TARDE,RESIDENTE
+Residente Ped 5,Pediatria,QUA,TARDE,RESIDENTE
+Residente Ped 6,Pediatria,QUA,TARDE,RESIDENTE
+Dr(a). Costa (Gin),Ginecologia/ Obstetrícia,QUA,TARDE,DOCENTE
+Dr(a). Oliveira (Gin),Ginecologia/ Obstetrícia,QUA,TARDE,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Residente Gin 6,Ginecologia/ Obstetrícia,QUA,TARDE,RESIDENTE
+Dr(a). Silva (Ort),Ortopedia,QUA,TARDE,DOCENTE
+Residente Ort 1,Ortopedia,QUA,TARDE,RESIDENTE
+Residente Ort 2,Ortopedia,QUA,TARDE,RESIDENTE
+Residente Ort 3,Ortopedia,QUA,TARDE,RESIDENTE
+Residente Ort 4,Ortopedia,QUA,TARDE,RESIDENTE
+Dr(a). Silva (Neu),Neurologia,QUA,TARDE,DOCENTE
+Residente Neu 1,Neurologia,QUA,TARDE,RESIDENTE
+Residente Neu 2,Neurologia,QUA,TARDE,RESIDENTE
+Residente Neu 3,Neurologia,QUA,TARDE,RESIDENTE
+Dr(a). Costa (Car),Cardiologia,QUA,TARDE,DOCENTE
+Residente Car 1,Cardiologia,QUA,TARDE,RESIDENTE
+Residente Car 2,Cardiologia,QUA,TARDE,RESIDENTE
+Residente Car 3,Cardiologia,QUA,TARDE,RESIDENTE
+Dr(a). Souza (Oft),Oftalmo,QUA,TARDE,DOCENTE
+Residente Oft 1,Oftalmo,QUA,TARDE,RESIDENTE
+Residente Oft 2,Oftalmo,QUA,TARDE,RESIDENTE
+Residente Oft 3,Oftalmo,QUA,TARDE,RESIDENTE
+Residente Oft 4,Oftalmo,QUA,TARDE,RESIDENTE
+Dr(a). Almeida (Der),Dermatologia,QUA,TARDE,DOCENTE
+Residente Der 1,Dermatologia,QUA,TARDE,RESIDENTE
+Dr(a). Costa (Psi),Psiquiatria,QUA,TARDE,DOCENTE
+Residente Psi 1,Psiquiatria,QUA,TARDE,RESIDENTE
+Residente Psi 2,Psiquiatria,QUA,TARDE,RESIDENTE
+Residente Psi 3,Psiquiatria,QUA,TARDE,RESIDENTE
+Dr(a). Santos (Clí),Clínica Médica/ Geriatria/ Dor,QUA,TARDE,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,QUA,TARDE,RESIDENTE
+Dr(a). Rodrigues (Gas),Gastro,QUA,TARDE,DOCENTE
+Residente Gas 1,Gastro,QUA,TARDE,RESIDENTE
+Residente Gas 2,Gastro,QUA,TARDE,RESIDENTE
+Dr(a). Santos (Reu),Reumatologia,QUA,TARDE,DOCENTE
+Residente Reu 1,Reumatologia,QUA,TARDE,RESIDENTE
+Residente Reu 2,Reumatologia,QUA,TARDE,RESIDENTE
+Dr(a). Alves (Oto),Otorrino,QUA,TARDE,DOCENTE
+Residente Oto 1,Otorrino,QUA,TARDE,RESIDENTE
+Residente Oto 2,Otorrino,QUA,TARDE,RESIDENTE
+Dr(a). Silva (Pne),Pneumologia,QUA,TARDE,DOCENTE
+Residente Pne 1,Pneumologia,QUA,TARDE,RESIDENTE
+Dr(a). Lima (Uro),Urologia,QUA,TARDE,DOCENTE
+Residente Uro 1,Urologia,QUA,TARDE,RESIDENTE
+Dr(a). Mendes (Onc),Oncologia,QUA,TARDE,DOCENTE
+Residente Onc 1,Oncologia,QUA,TARDE,RESIDENTE
+Residente Onc 2,Oncologia,QUA,TARDE,RESIDENTE
+Dr(a). Lima (Nef),Nefrologia,QUA,TARDE,DOCENTE
+Residente Nef 1,Nefrologia,QUA,TARDE,RESIDENTE
+Dr(a). Souza (End),Endocrinologia,QUA,TARDE,DOCENTE
+Dr(a). Costa (Cir),Cirurgia Geral,QUA,TARDE,DOCENTE
+Residente Cir 1,Cirurgia Geral,QUA,TARDE,RESIDENTE
+Dr(a). Almeida (Inf),Infectologia,QUA,TARDE,DOCENTE
+Residente Inf 1,Infectologia,QUA,TARDE,RESIDENTE
+Dr(a). Oliveira (Vas),Vascular,QUA,TARDE,DOCENTE
+Dr(a). Ferreira (Hem),Hematologia,QUA,TARDE,DOCENTE
+Dr(a). Ribeiro (Plá),Plástica,QUA,TARDE,DOCENTE
+Dr(a). Nascimento (Col),Colposcopia,QUA,TARDE,DOCENTE
+Dr(a). Alves (Esp),Espaço Trans,QUA,TARDE,DOCENTE
+Dr(a). Rodrigues (Ter),Terapia Familiar,QUA,TARDE,DOCENTE
+Dr(a). Pereira (Fon),Fonoaudiologia,QUA,TARDE,DOCENTE
+Dr(a). Souza (Pré),Pré Operatorio,QUA,TARDE,DOCENTE
+Dr(a). Oliveira (Sal),Sala de Vacina,QUA,TARDE,DOCENTE
+Dr(a). Carvalho (Pue),Puericultura,QUA,TARDE,DOCENTE
+Dr(a). Oliveira (Ped),Pediatria,QUI,MANHA,DOCENTE
+Dr(a). Santos (Ped),Pediatria,QUI,MANHA,DOCENTE
+Dr(a). Pereira (Ped),Pediatria,QUI,MANHA,DOCENTE
+Residente Ped 1,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 2,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 3,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 4,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 5,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 6,Pediatria,QUI,MANHA,RESIDENTE
+Residente Ped 7,Pediatria,QUI,MANHA,RESIDENTE
+Dr(a). Carvalho (Gin),Ginecologia/ Obstetrícia,QUI,MANHA,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,QUI,MANHA,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,QUI,MANHA,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,QUI,MANHA,RESIDENTE
+Dr(a). Costa (Ort),Ortopedia,QUI,MANHA,DOCENTE
+Residente Ort 1,Ortopedia,QUI,MANHA,RESIDENTE
+Residente Ort 2,Ortopedia,QUI,MANHA,RESIDENTE
+Residente Ort 3,Ortopedia,QUI,MANHA,RESIDENTE
+Residente Ort 4,Ortopedia,QUI,MANHA,RESIDENTE
+Dr(a). Nascimento (Neu),Neurologia,QUI,MANHA,DOCENTE
+Dr(a). Mendes (Neu),Neurologia,QUI,MANHA,DOCENTE
+Residente Neu 1,Neurologia,QUI,MANHA,RESIDENTE
+Residente Neu 2,Neurologia,QUI,MANHA,RESIDENTE
+Residente Neu 3,Neurologia,QUI,MANHA,RESIDENTE
+Residente Neu 4,Neurologia,QUI,MANHA,RESIDENTE
+Residente Neu 5,Neurologia,QUI,MANHA,RESIDENTE
+Dr(a). Lima (Car),Cardiologia,QUI,MANHA,DOCENTE
+Residente Car 1,Cardiologia,QUI,MANHA,RESIDENTE
+Residente Car 2,Cardiologia,QUI,MANHA,RESIDENTE
+Residente Car 3,Cardiologia,QUI,MANHA,RESIDENTE
+Dr(a). Ribeiro (Oft),Oftalmo,QUI,MANHA,DOCENTE
+Residente Oft 1,Oftalmo,QUI,MANHA,RESIDENTE
+Residente Oft 2,Oftalmo,QUI,MANHA,RESIDENTE
+Dr(a). Almeida (Der),Dermatologia,QUI,MANHA,DOCENTE
+Residente Der 1,Dermatologia,QUI,MANHA,RESIDENTE
+Residente Der 2,Dermatologia,QUI,MANHA,RESIDENTE
+Residente Der 3,Dermatologia,QUI,MANHA,RESIDENTE
+Dr(a). Souza (Psi),Psiquiatria,QUI,MANHA,DOCENTE
+Residente Psi 1,Psiquiatria,QUI,MANHA,RESIDENTE
+Residente Psi 2,Psiquiatria,QUI,MANHA,RESIDENTE
+Residente Psi 3,Psiquiatria,QUI,MANHA,RESIDENTE
+Dr(a). Nascimento (Clí),Clínica Médica/ Geriatria/ Dor,QUI,MANHA,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,QUI,MANHA,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,QUI,MANHA,RESIDENTE
+Dr(a). Silva (Gas),Gastro,QUI,MANHA,DOCENTE
+Residente Gas 1,Gastro,QUI,MANHA,RESIDENTE
+Residente Gas 2,Gastro,QUI,MANHA,RESIDENTE
+Dr(a). Silva (Reu),Reumatologia,QUI,MANHA,DOCENTE
+Residente Reu 1,Reumatologia,QUI,MANHA,RESIDENTE
+Residente Reu 2,Reumatologia,QUI,MANHA,RESIDENTE
+Dr(a). Mendes (Oto),Otorrino,QUI,MANHA,DOCENTE
+Residente Oto 1,Otorrino,QUI,MANHA,RESIDENTE
+Residente Oto 2,Otorrino,QUI,MANHA,RESIDENTE
+Dr(a). Mendes (Pne),Pneumologia,QUI,MANHA,DOCENTE
+Residente Pne 1,Pneumologia,QUI,MANHA,RESIDENTE
+Residente Pne 2,Pneumologia,QUI,MANHA,RESIDENTE
+Dr(a). Alves (Uro),Urologia,QUI,MANHA,DOCENTE
+Residente Uro 1,Urologia,QUI,MANHA,RESIDENTE
+Residente Uro 2,Urologia,QUI,MANHA,RESIDENTE
+Dr(a). Ribeiro (Onc),Oncologia,QUI,MANHA,DOCENTE
+Residente Onc 1,Oncologia,QUI,MANHA,RESIDENTE
+Residente Onc 2,Oncologia,QUI,MANHA,RESIDENTE
+Dr(a). Nascimento (Nef),Nefrologia,QUI,MANHA,DOCENTE
+Dr(a). Nascimento (End),Endocrinologia,QUI,MANHA,DOCENTE
+Residente End 1,Endocrinologia,QUI,MANHA,RESIDENTE
+Dr(a). Ribeiro (Cir),Cirurgia Geral,QUI,MANHA,DOCENTE
+Dr(a). Santos (Inf),Infectologia,QUI,MANHA,DOCENTE
+Residente Inf 1,Infectologia,QUI,MANHA,RESIDENTE
+Dr(a). Alves (Vas),Vascular,QUI,MANHA,DOCENTE
+Residente Vas 1,Vascular,QUI,MANHA,RESIDENTE
+Dr(a). Souza (Hem),Hematologia,QUI,MANHA,DOCENTE
+Residente Hem 1,Hematologia,QUI,MANHA,RESIDENTE
+Dr(a). Carvalho (Plá),Plástica,QUI,MANHA,DOCENTE
+Dr(a). Lima (Col),Colposcopia,QUI,MANHA,DOCENTE
+Dr(a). Ribeiro (Esp),Espaço Trans,QUI,MANHA,DOCENTE
+Dr(a). Alves (Ter),Terapia Familiar,QUI,MANHA,DOCENTE
+Dr(a). Ferreira (Fon),Fonoaudiologia,QUI,MANHA,DOCENTE
+Dr(a). Silva (Pré),Pré Operatorio,QUI,MANHA,DOCENTE
+Dr(a). Almeida (Sal),Sala de Vacina,QUI,MANHA,DOCENTE
+Dr(a). Carvalho (Pue),Puericultura,QUI,MANHA,DOCENTE
+Dr(a). Carvalho (Ped),Pediatria,QUI,TARDE,DOCENTE
+Dr(a). Alves (Ped),Pediatria,QUI,TARDE,DOCENTE
+Residente Ped 1,Pediatria,QUI,TARDE,RESIDENTE
+Residente Ped 2,Pediatria,QUI,TARDE,RESIDENTE
+Residente Ped 3,Pediatria,QUI,TARDE,RESIDENTE
+Residente Ped 4,Pediatria,QUI,TARDE,RESIDENTE
+Residente Ped 5,Pediatria,QUI,TARDE,RESIDENTE
+Residente Ped 6,Pediatria,QUI,TARDE,RESIDENTE
+Dr(a). Alves (Gin),Ginecologia/ Obstetrícia,QUI,TARDE,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,QUI,TARDE,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,QUI,TARDE,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,QUI,TARDE,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,QUI,TARDE,RESIDENTE
+Dr(a). Nascimento (Ort),Ortopedia,QUI,TARDE,DOCENTE
+Residente Ort 1,Ortopedia,QUI,TARDE,RESIDENTE
+Residente Ort 2,Ortopedia,QUI,TARDE,RESIDENTE
+Residente Ort 3,Ortopedia,QUI,TARDE,RESIDENTE
+Residente Ort 4,Ortopedia,QUI,TARDE,RESIDENTE
+Dr(a). Souza (Neu),Neurologia,QUI,TARDE,DOCENTE
+Dr(a). Oliveira (Neu),Neurologia,QUI,TARDE,DOCENTE
+Residente Neu 1,Neurologia,QUI,TARDE,RESIDENTE
+Residente Neu 2,Neurologia,QUI,TARDE,RESIDENTE
+Residente Neu 3,Neurologia,QUI,TARDE,RESIDENTE
+Residente Neu 4,Neurologia,QUI,TARDE,RESIDENTE
+Residente Neu 5,Neurologia,QUI,TARDE,RESIDENTE
+Dr(a). Carvalho (Car),Cardiologia,QUI,TARDE,DOCENTE
+Residente Car 1,Cardiologia,QUI,TARDE,RESIDENTE
+Residente Car 2,Cardiologia,QUI,TARDE,RESIDENTE
+Dr(a). Silva (Oft),Oftalmo,QUI,TARDE,DOCENTE
+Residente Oft 1,Oftalmo,QUI,TARDE,RESIDENTE
+Residente Oft 2,Oftalmo,QUI,TARDE,RESIDENTE
+Residente Oft 3,Oftalmo,QUI,TARDE,RESIDENTE
+Residente Oft 4,Oftalmo,QUI,TARDE,RESIDENTE
+Dr(a). Mendes (Der),Dermatologia,QUI,TARDE,DOCENTE
+Residente Der 1,Dermatologia,QUI,TARDE,RESIDENTE
+Residente Der 2,Dermatologia,QUI,TARDE,RESIDENTE
+Residente Der 3,Dermatologia,QUI,TARDE,RESIDENTE
+Dr(a). Souza (Psi),Psiquiatria,QUI,TARDE,DOCENTE
+Residente Psi 1,Psiquiatria,QUI,TARDE,RESIDENTE
+Residente Psi 2,Psiquiatria,QUI,TARDE,RESIDENTE
+Residente Psi 3,Psiquiatria,QUI,TARDE,RESIDENTE
+Dr(a). Oliveira (Clí),Clínica Médica/ Geriatria/ Dor,QUI,TARDE,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,QUI,TARDE,RESIDENTE
+Residente Clí 2,Clínica Médica/ Geriatria/ Dor,QUI,TARDE,RESIDENTE
+Residente Clí 3,Clínica Médica/ Geriatria/ Dor,QUI,TARDE,RESIDENTE
+Dr(a). Santos (Gas),Gastro,QUI,TARDE,DOCENTE
+Residente Gas 1,Gastro,QUI,TARDE,RESIDENTE
+Residente Gas 2,Gastro,QUI,TARDE,RESIDENTE
+Dr(a). Oliveira (Reu),Reumatologia,QUI,TARDE,DOCENTE
+Residente Reu 1,Reumatologia,QUI,TARDE,RESIDENTE
+Residente Reu 2,Reumatologia,QUI,TARDE,RESIDENTE
+Dr(a). Carvalho (Oto),Otorrino,QUI,TARDE,DOCENTE
+Residente Oto 1,Otorrino,QUI,TARDE,RESIDENTE
+Residente Oto 2,Otorrino,QUI,TARDE,RESIDENTE
+Dr(a). Almeida (Pne),Pneumologia,QUI,TARDE,DOCENTE
+Residente Pne 1,Pneumologia,QUI,TARDE,RESIDENTE
+Residente Pne 2,Pneumologia,QUI,TARDE,RESIDENTE
+Dr(a). Almeida (Uro),Urologia,QUI,TARDE,DOCENTE
+Residente Uro 1,Urologia,QUI,TARDE,RESIDENTE
+Residente Uro 2,Urologia,QUI,TARDE,RESIDENTE
+Dr(a). Costa (Onc),Oncologia,QUI,TARDE,DOCENTE
+Residente Onc 1,Oncologia,QUI,TARDE,RESIDENTE
+Dr(a). Costa (Nef),Nefrologia,QUI,TARDE,DOCENTE
+Dr(a). Alves (End),Endocrinologia,QUI,TARDE,DOCENTE
+Dr(a). Silva (Cir),Cirurgia Geral,QUI,TARDE,DOCENTE
+Residente Cir 1,Cirurgia Geral,QUI,TARDE,RESIDENTE
+Dr(a). Almeida (Inf),Infectologia,QUI,TARDE,DOCENTE
+Dr(a). Souza (Vas),Vascular,QUI,TARDE,DOCENTE
+Dr(a). Souza (Hem),Hematologia,QUI,TARDE,DOCENTE
+Dr(a). Costa (Plá),Plástica,QUI,TARDE,DOCENTE
+Dr(a). Carvalho (Col),Colposcopia,QUI,TARDE,DOCENTE
+Dr(a). Lima (Esp),Espaço Trans,QUI,TARDE,DOCENTE
+Dr(a). Silva (Ter),Terapia Familiar,QUI,TARDE,DOCENTE
+Dr(a). Souza (Fon),Fonoaudiologia,QUI,TARDE,DOCENTE
+Dr(a). Almeida (Pré),Pré Operatorio,QUI,TARDE,DOCENTE
+Dr(a). Rodrigues (Sal),Sala de Vacina,QUI,TARDE,DOCENTE
+Dr(a). Rodrigues (Pue),Puericultura,QUI,TARDE,DOCENTE
+Dr(a). Santos (Ped),Pediatria,SEX,MANHA,DOCENTE
+Dr(a). Nascimento (Ped),Pediatria,SEX,MANHA,DOCENTE
+Residente Ped 1,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 2,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 3,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 4,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 5,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 6,Pediatria,SEX,MANHA,RESIDENTE
+Residente Ped 7,Pediatria,SEX,MANHA,RESIDENTE
+Dr(a). Mendes (Gin),Ginecologia/ Obstetrícia,SEX,MANHA,DOCENTE
+Dr(a). Silva (Gin),Ginecologia/ Obstetrícia,SEX,MANHA,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Residente Gin 6,Ginecologia/ Obstetrícia,SEX,MANHA,RESIDENTE
+Dr(a). Carvalho (Ort),Ortopedia,SEX,MANHA,DOCENTE
+Residente Ort 1,Ortopedia,SEX,MANHA,RESIDENTE
+Residente Ort 2,Ortopedia,SEX,MANHA,RESIDENTE
+Residente Ort 3,Ortopedia,SEX,MANHA,RESIDENTE
+Residente Ort 4,Ortopedia,SEX,MANHA,RESIDENTE
+Dr(a). Carvalho (Neu),Neurologia,SEX,MANHA,DOCENTE
+Dr(a). Carvalho (Neu),Neurologia,SEX,MANHA,DOCENTE
+Residente Neu 1,Neurologia,SEX,MANHA,RESIDENTE
+Residente Neu 2,Neurologia,SEX,MANHA,RESIDENTE
+Residente Neu 3,Neurologia,SEX,MANHA,RESIDENTE
+Residente Neu 4,Neurologia,SEX,MANHA,RESIDENTE
+Residente Neu 5,Neurologia,SEX,MANHA,RESIDENTE
+Dr(a). Alves (Car),Cardiologia,SEX,MANHA,DOCENTE
+Residente Car 1,Cardiologia,SEX,MANHA,RESIDENTE
+Residente Car 2,Cardiologia,SEX,MANHA,RESIDENTE
+Residente Car 3,Cardiologia,SEX,MANHA,RESIDENTE
+Dr(a). Ribeiro (Oft),Oftalmo,SEX,MANHA,DOCENTE
+Residente Oft 1,Oftalmo,SEX,MANHA,RESIDENTE
+Residente Oft 2,Oftalmo,SEX,MANHA,RESIDENTE
+Residente Oft 3,Oftalmo,SEX,MANHA,RESIDENTE
+Dr(a). Pereira (Der),Dermatologia,SEX,MANHA,DOCENTE
+Residente Der 1,Dermatologia,SEX,MANHA,RESIDENTE
+Residente Der 2,Dermatologia,SEX,MANHA,RESIDENTE
+Dr(a). Nascimento (Psi),Psiquiatria,SEX,MANHA,DOCENTE
+Residente Psi 1,Psiquiatria,SEX,MANHA,RESIDENTE
+Dr(a). Santos (Clí),Clínica Médica/ Geriatria/ Dor,SEX,MANHA,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,SEX,MANHA,RESIDENTE
+Dr(a). Almeida (Gas),Gastro,SEX,MANHA,DOCENTE
+Residente Gas 1,Gastro,SEX,MANHA,RESIDENTE
+Residente Gas 2,Gastro,SEX,MANHA,RESIDENTE
+Dr(a). Souza (Reu),Reumatologia,SEX,MANHA,DOCENTE
+Residente Reu 1,Reumatologia,SEX,MANHA,RESIDENTE
+Residente Reu 2,Reumatologia,SEX,MANHA,RESIDENTE
+Dr(a). Ferreira (Oto),Otorrino,SEX,MANHA,DOCENTE
+Residente Oto 1,Otorrino,SEX,MANHA,RESIDENTE
+Dr(a). Rodrigues (Pne),Pneumologia,SEX,MANHA,DOCENTE
+Residente Pne 1,Pneumologia,SEX,MANHA,RESIDENTE
+Residente Pne 2,Pneumologia,SEX,MANHA,RESIDENTE
+Dr(a). Rodrigues (Uro),Urologia,SEX,MANHA,DOCENTE
+Residente Uro 1,Urologia,SEX,MANHA,RESIDENTE
+Dr(a). Souza (Onc),Oncologia,SEX,MANHA,DOCENTE
+Residente Onc 1,Oncologia,SEX,MANHA,RESIDENTE
+Residente Onc 2,Oncologia,SEX,MANHA,RESIDENTE
+Dr(a). Mendes (Nef),Nefrologia,SEX,MANHA,DOCENTE
+Dr(a). Silva (End),Endocrinologia,SEX,MANHA,DOCENTE
+Residente End 1,Endocrinologia,SEX,MANHA,RESIDENTE
+Dr(a). Silva (Cir),Cirurgia Geral,SEX,MANHA,DOCENTE
+Residente Cir 1,Cirurgia Geral,SEX,MANHA,RESIDENTE
+Dr(a). Ferreira (Inf),Infectologia,SEX,MANHA,DOCENTE
+Dr(a). Rodrigues (Vas),Vascular,SEX,MANHA,DOCENTE
+Dr(a). Ribeiro (Hem),Hematologia,SEX,MANHA,DOCENTE
+Dr(a). Rodrigues (Plá),Plástica,SEX,MANHA,DOCENTE
+Dr(a). Nascimento (Col),Colposcopia,SEX,MANHA,DOCENTE
+Dr(a). Ribeiro (Esp),Espaço Trans,SEX,MANHA,DOCENTE
+Dr(a). Nascimento (Ter),Terapia Familiar,SEX,MANHA,DOCENTE
+Dr(a). Costa (Fon),Fonoaudiologia,SEX,MANHA,DOCENTE
+Dr(a). Ribeiro (Pré),Pré Operatorio,SEX,MANHA,DOCENTE
+Dr(a). Pereira (Sal),Sala de Vacina,SEX,MANHA,DOCENTE
+Dr(a). Almeida (Pue),Puericultura,SEX,MANHA,DOCENTE
+Dr(a). Costa (Ped),Pediatria,SEX,TARDE,DOCENTE
+Dr(a). Nascimento (Ped),Pediatria,SEX,TARDE,DOCENTE
+Residente Ped 1,Pediatria,SEX,TARDE,RESIDENTE
+Residente Ped 2,Pediatria,SEX,TARDE,RESIDENTE
+Residente Ped 3,Pediatria,SEX,TARDE,RESIDENTE
+Residente Ped 4,Pediatria,SEX,TARDE,RESIDENTE
+Residente Ped 5,Pediatria,SEX,TARDE,RESIDENTE
+Residente Ped 6,Pediatria,SEX,TARDE,RESIDENTE
+Dr(a). Almeida (Gin),Ginecologia/ Obstetrícia,SEX,TARDE,DOCENTE
+Dr(a). Carvalho (Gin),Ginecologia/ Obstetrícia,SEX,TARDE,DOCENTE
+Residente Gin 1,Ginecologia/ Obstetrícia,SEX,TARDE,RESIDENTE
+Residente Gin 2,Ginecologia/ Obstetrícia,SEX,TARDE,RESIDENTE
+Residente Gin 3,Ginecologia/ Obstetrícia,SEX,TARDE,RESIDENTE
+Residente Gin 4,Ginecologia/ Obstetrícia,SEX,TARDE,RESIDENTE
+Residente Gin 5,Ginecologia/ Obstetrícia,SEX,TARDE,RESIDENTE
+Dr(a). Ferreira (Ort),Ortopedia,SEX,TARDE,DOCENTE
+Residente Ort 1,Ortopedia,SEX,TARDE,RESIDENTE
+Residente Ort 2,Ortopedia,SEX,TARDE,RESIDENTE
+Residente Ort 3,Ortopedia,SEX,TARDE,RESIDENTE
+Residente Ort 4,Ortopedia,SEX,TARDE,RESIDENTE
+Residente Ort 5,Ortopedia,SEX,TARDE,RESIDENTE
+Dr(a). Alves (Neu),Neurologia,SEX,TARDE,DOCENTE
+Residente Neu 1,Neurologia,SEX,TARDE,RESIDENTE
+Residente Neu 2,Neurologia,SEX,TARDE,RESIDENTE
+Residente Neu 3,Neurologia,SEX,TARDE,RESIDENTE
+Residente Neu 4,Neurologia,SEX,TARDE,RESIDENTE
+Residente Neu 5,Neurologia,SEX,TARDE,RESIDENTE
+Dr(a). Alves (Car),Cardiologia,SEX,TARDE,DOCENTE
+Residente Car 1,Cardiologia,SEX,TARDE,RESIDENTE
+Residente Car 2,Cardiologia,SEX,TARDE,RESIDENTE
+Residente Car 3,Cardiologia,SEX,TARDE,RESIDENTE
+Residente Car 4,Cardiologia,SEX,TARDE,RESIDENTE
+Dr(a). Almeida (Oft),Oftalmo,SEX,TARDE,DOCENTE
+Residente Oft 1,Oftalmo,SEX,TARDE,RESIDENTE
+Residente Oft 2,Oftalmo,SEX,TARDE,RESIDENTE
+Residente Oft 3,Oftalmo,SEX,TARDE,RESIDENTE
+Residente Oft 4,Oftalmo,SEX,TARDE,RESIDENTE
+Dr(a). Silva (Der),Dermatologia,SEX,TARDE,DOCENTE
+Residente Der 1,Dermatologia,SEX,TARDE,RESIDENTE
+Dr(a). Pereira (Psi),Psiquiatria,SEX,TARDE,DOCENTE
+Residente Psi 1,Psiquiatria,SEX,TARDE,RESIDENTE
+Residente Psi 2,Psiquiatria,SEX,TARDE,RESIDENTE
+Dr(a). Costa (Clí),Clínica Médica/ Geriatria/ Dor,SEX,TARDE,DOCENTE
+Residente Clí 1,Clínica Médica/ Geriatria/ Dor,SEX,TARDE,RESIDENTE
+Dr(a). Oliveira (Gas),Gastro,SEX,TARDE,DOCENTE
+Residente Gas 1,Gastro,SEX,TARDE,RESIDENTE
+Residente Gas 2,Gastro,SEX,TARDE,RESIDENTE
+Dr(a). Pereira (Reu),Reumatologia,SEX,TARDE,DOCENTE
+Residente Reu 1,Reumatologia,SEX,TARDE,RESIDENTE
+Residente Reu 2,Reumatologia,SEX,TARDE,RESIDENTE
+Dr(a). Lima (Oto),Otorrino,SEX,TARDE,DOCENTE
+Residente Oto 1,Otorrino,SEX,TARDE,RESIDENTE
+Residente Oto 2,Otorrino,SEX,TARDE,RESIDENTE
+Dr(a). Alves (Pne),Pneumologia,SEX,TARDE,DOCENTE
+Residente Pne 1,Pneumologia,SEX,TARDE,RESIDENTE
+Residente Pne 2,Pneumologia,SEX,TARDE,RESIDENTE
+Dr(a). Souza (Uro),Urologia,SEX,TARDE,DOCENTE
+Residente Uro 1,Urologia,SEX,TARDE,RESIDENTE
+Residente Uro 2,Urologia,SEX,TARDE,RESIDENTE
+Dr(a). Alves (Onc),Oncologia,SEX,TARDE,DOCENTE
+Residente Onc 1,Oncologia,SEX,TARDE,RESIDENTE
+Dr(a). Almeida (Nef),Nefrologia,SEX,TARDE,DOCENTE
+Dr(a). Oliveira (End),Endocrinologia,SEX,TARDE,DOCENTE
+Residente End 1,Endocrinologia,SEX,TARDE,RESIDENTE
+Dr(a). Pereira (Cir),Cirurgia Geral,SEX,TARDE,DOCENTE
+Dr(a). Rodrigues (Inf),Infectologia,SEX,TARDE,DOCENTE
+Residente Inf 1,Infectologia,SEX,TARDE,RESIDENTE
+Dr(a). Silva (Vas),Vascular,SEX,TARDE,DOCENTE
+Residente Vas 1,Vascular,SEX,TARDE,RESIDENTE
+Dr(a). Almeida (Hem),Hematologia,SEX,TARDE,DOCENTE
+Dr(a). Ferreira (Plá),Plástica,SEX,TARDE,DOCENTE
+Dr(a). Nascimento (Col),Colposcopia,SEX,TARDE,DOCENTE
+Dr(a). Ferreira (Esp),Espaço Trans,SEX,TARDE,DOCENTE
+Dr(a). Lima (Ter),Terapia Familiar,SEX,TARDE,DOCENTE
+Dr(a). Oliveira (Fon),Fonoaudiologia,SEX,TARDE,DOCENTE
+Dr(a). Lima (Pré),Pré Operatorio,SEX,TARDE,DOCENTE
+Dr(a). Souza (Sal),Sala de Vacina,SEX,TARDE,DOCENTE
+Dr(a). Ribeiro (Pue),Puericultura,SEX,TARDE,DOCENTE

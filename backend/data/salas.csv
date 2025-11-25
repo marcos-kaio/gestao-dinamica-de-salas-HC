@@ -1,0 +1,36 @@
+Pavimento,Nome do ambulatório,Número de salas existestes,Característica,OBS
+1º pavimento (Térreo) Bloco E,fechado para obra,11,clínicos,antes funcionava a reabilitação
+1º pavimento (Térreo) Bloco E,fechado para obra,8,clínicos,antes funcionava a cirurgia geral
+1º pavimento (Térreo) Bloco E,fechado para obra,11,clínicos,antes funcionava a reumatologia
+1º pavimento (Térreo) Bloco E,fechado para obra,8,clínicos,antes funcionava a ortopedia
+1º pavimento (Térreo) Anexo,Dermatologia,6,clínicos,
+1º pavimento (Térreo) Anexo,Gastro,5,clínicos,
+2º pavimento Bloco E,Reumatologia,10,clínicos,
+2º pavimento Bloco E,Espaço Trans,3,clínicos,
+2º pavimento Bloco E,Terapia Familiar,2,clínicos,
+2º pavimento Bloco E,Neurologia,14,clínicos,
+2º pavimento Bloco E,endocrinologia,6,clínicos,
+2º pavimento Bloco E,pré operatorio,1,clínicos,
+2º pavimento Bloco E,ginecologia/ obstetrícia,10,especializado,Precisa de macas ginecológicas
+2º pavimento Bloco E,cirurgia geral,8,clínicos,
+2º pavimento Bloco E,Sala de vacina,1,clínicos,
+2º pavimento Bloco E,Puericultura,3,clínicos,
+2º pavimento Bloco F,Pediatria,23,clínicos,
+3º pavimento Bloco E,Colposcopia,5,especializado,Precisa de macas ginecológicas
+3º pavimento Bloco E,Plástica,3,clínicos,
+3º pavimento Bloco E,Clínica médica/ Geriatria/ dor,10,clínicos,
+3º pavimento Bloco E,oncologia,8,clínicos,Tem um salao grande de quimioterapia com 17 leitos
+3º pavimento Bloco E,Fonoaudiologia,2,clínicos,
+3º pavimento Bloco F,Nefrologia,6,clínicos,
+3º pavimento Bloco F,Ortopedia,5,clínicos,
+3º pavimento Bloco F,Cardiologia,6,clínicos,
+3º pavimento Bloco F,Hematologia,4,clínicos,
+4º pavimento Bloco F,Fechado para obras,24,clínicos,
+5º pavimento Bloco F,Pneumologia,6,clínicos,
+5º pavimento Bloco F,Urologia,6,especializado,Tem procedimentos
+5º pavimento Bloco F,Doenças infecto contagiosas- DIP,6,clínicos,
+5º pavimento Bloco F,Vascular,4,clínicos,
+6º pavimento Bloco F,Otorrino,6,especializado,Equipamentos especializados
+6º pavimento Bloco F,Oftalmo,14,especializado,Equipamentos especializados
+6º pavimento Bloco C,Psiquiatria,10,clínicos,
+,,255,,
