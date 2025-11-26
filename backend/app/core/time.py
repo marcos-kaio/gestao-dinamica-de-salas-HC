@@ -28,6 +28,7 @@ def determinar_periodo_atual():
 def sincronizar_status_com_alocacao(db: Session, forcar_dia: str = None, forcar_turno: str = None):
     """
     Pega as alocações planejadas e aplica no status real das salas.
+    [CORREÇÃO]: Preserva check-ins manuais e grava data completa.
     """
 
     dia, turno = determinar_periodo_atual()
@@ -37,32 +38,43 @@ def sincronizar_status_com_alocacao(db: Session, forcar_dia: str = None, forcar_
 
     print(f"--- Sincronizando Realidade para: {dia} - {turno} ---")
 
-
+    # 1. Limpeza Inteligente: Só libera salas que NÃO estão ocupadas
     salas = db.query(Sala).all()
     for s in salas:
-        if not s.is_maintenance:
-            s.status_atual = "LIVRE"
-            s.ocupante_atual = None
-            s.horario_entrada = None
+        if s.is_maintenance:
+            continue
+            
+        # Preserva check-ins existentes
+        if s.status_atual == "OCUPADA" and s.ocupante_atual is not None:
+            continue
 
+        s.status_atual = "LIVRE"
+        s.ocupante_atual = None
+        s.horario_entrada = None
+
+    # 2. Aplica a Grade Planejada
     alocacoes_do_momento = db.query(Alocacao).filter(
         Alocacao.dia_semana == dia,
         Alocacao.turno == turno
     ).all()
 
     count_ocupadas = 0
+    # Formato de data completo (Dia/Mês/Ano Hora:Minuto)
+    agora_formatado = datetime.now().strftime("%d/%m/%Y %H:%M")
+
     for aloc in alocacoes_do_momento:
         sala = db.query(Sala).filter(Sala.id == aloc.sala_id).first()
-        if sala and not sala.is_maintenance:
+        
+        # Só aloca se a sala estiver LIVRE (respeita quem já fez check-in manual/preservado)
+        if sala and not sala.is_maintenance and sala.status_atual == "LIVRE":
             # Busca o nome do médico na tabela Grade para preencher
             grade = db.query(Grade).filter(Grade.id == aloc.grade_id).first()
             nome_medico = grade.nome_profissional if grade else "Alocação Automática"
 
             sala.status_atual = "OCUPADA"
             sala.ocupante_atual = nome_medico
-            sala.horario_entrada = datetime.now().strftime("%H:%M")
+            sala.horario_entrada = agora_formatado
             count_ocupadas += 1
 
     db.commit()
     return count_ocupadas, dia, turno
-
