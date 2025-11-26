@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 pydantic
+pandas
 pydantic-settings
 sqlalchemy
 python-multipart

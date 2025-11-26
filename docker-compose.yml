@@ -8,6 +8,8 @@ services:
     volumes:
       # Isso permite que você edite o arquivo no seu PC e atualize no Docker automaticamente
       - ./backend:/app
+    environment:
+      - TZ=America/Recife
 
   # Serviço do Frontend
   frontend:
