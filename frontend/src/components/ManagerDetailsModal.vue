@@ -4,7 +4,7 @@ import { defineProps, defineEmits } from 'vue'
 // Interface dos dados que vêm do Dashboard
 interface ResumoAmbulatorio {
   ambulatorio: string;
-  total_salas: number;
+  total_alocadas: number;
   localizacao: string[];
   lista_salas: string[];
 }
@@ -47,7 +47,7 @@ const handleClose = () => {
           </div>
           
           <div class="text-2xl font-bold text-gray-900">
-            {{ data.total_salas }} <span class="text-sm font-normal text-gray-500">salas</span>
+            {{ data.total_alocadas }} <span class="text-sm font-normal text-gray-500">salas</span>
           </div>
         </div>
 

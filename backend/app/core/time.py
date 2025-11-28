@@ -2,15 +2,8 @@ from sqlalchemy.orm import Session
 from app.models import Sala, Grade, Alocacao
 from datetime import datetime
 
-# Função para conseguir o tempo atual
 def determinar_periodo_atual():
-    """
-    Função auxiliar para descobrir o dia e turno atual.
-    Retorna (dia_semana, turno). Ex: ("SEG", "MANHA")
-    """
     agora = datetime.now()
-    
-    #mapeamento dos dias
     dias_map = {0: "SEG", 1: "TER", 2: "QUA", 3: "QUI", 4: "SEX", 5: "SAB", 6: "DOM"}
     dia_atual = dias_map.get(agora.weekday(), "SEG")
 
@@ -22,59 +15,51 @@ def determinar_periodo_atual():
     else:
         turno_atual = "NOITE"
         
-    print(f" [SISTEMA] Horário Detectado: {agora} | Dia: {dia_atual} | Turno: {turno_atual}")
+    print(f" [SISTEMA] Horário: {agora} | Dia: {dia_atual} | Turno: {turno_atual}")
     return dia_atual, turno_atual
 
 def sincronizar_status_com_alocacao(db: Session, forcar_dia: str = None, forcar_turno: str = None):
-    """
-    Pega as alocações planejadas e aplica no status real das salas.
-    [CORREÇÃO]: Preserva check-ins manuais e grava data completa.
-    """
-
     dia, turno = determinar_periodo_atual()
-
     if forcar_dia: dia = forcar_dia
     if forcar_turno: turno = forcar_turno
 
-    print(f"--- Sincronizando Realidade para: {dia} - {turno} ---")
-
-    # 1. Limpeza Inteligente: Só libera salas que NÃO estão ocupadas
-    salas = db.query(Sala).all()
-    for s in salas:
-        if s.is_maintenance:
-            continue
-            
-        # Preserva check-ins existentes
-        if s.status_atual == "OCUPADA" and s.ocupante_atual is not None:
-            continue
-
-        s.status_atual = "LIVRE"
-        s.ocupante_atual = None
-        s.horario_entrada = None
-
-    # 2. Aplica a Grade Planejada
-    alocacoes_do_momento = db.query(Alocacao).filter(
+    # Busca alocações do momento
+    alocacoes = db.query(Alocacao).filter(
         Alocacao.dia_semana == dia,
         Alocacao.turno == turno
     ).all()
-
+    
+    mapa_reservas = {a.sala_id: a.grade_id for a in alocacoes}
+    salas = db.query(Sala).all()
     count_ocupadas = 0
-    # Formato de data completo (Dia/Mês/Ano Hora:Minuto)
-    agora_formatado = datetime.now().strftime("%d/%m/%Y %H:%M")
+    agora_str = datetime.now().strftime("%H:%M")
 
-    for aloc in alocacoes_do_momento:
-        sala = db.query(Sala).filter(Sala.id == aloc.sala_id).first()
+    for s in salas:
+        if s.is_maintenance: continue
         
-        # Só aloca se a sala estiver LIVRE (respeita quem já fez check-in manual/preservado)
-        if sala and not sala.is_maintenance and sala.status_atual == "LIVRE":
-            # Busca o nome do médico na tabela Grade para preencher
-            grade = db.query(Grade).filter(Grade.id == aloc.grade_id).first()
-            nome_medico = grade.nome_profissional if grade else "Alocação Automática"
-
-            sala.status_atual = "OCUPADA"
-            sala.ocupante_atual = nome_medico
-            sala.horario_entrada = agora_formatado
-            count_ocupadas += 1
+        grade_id = mapa_reservas.get(s.id)
+        if grade_id:
+            # Sala alocada!
+            grade = db.query(Grade).filter(Grade.id == grade_id).first()
+            if grade:
+                s.status_atual = "OCUPADA"
+                # Grava Nome (Especialidade) para o Monitoramento
+                s.ocupante_atual = f"{grade.nome_profissional} ({grade.especialidade})"
+                # IMPORTANTE: A especialidade ativa da sala passa a ser a do médico
+                s.especialidade_atual = grade.especialidade
+                
+                if not s.horario_entrada:
+                    s.horario_entrada = agora_str
+                count_ocupadas += 1
+        else:
+            # Sala Livre
+            # Se estava ocupada por alocação automática, limpa.
+            # (Mantém se tiver lógica de check-in manual persistente, mas aqui resetamos para refletir o turno)
+            if s.status_atual == "OCUPADA":
+                 s.status_atual = "LIVRE"
+                 s.ocupante_atual = None
+                 s.especialidade_atual = None # Volta a ser "genérica" ou do CSV
+                 s.horario_entrada = None
 
     db.commit()
     return count_ocupadas, dia, turno

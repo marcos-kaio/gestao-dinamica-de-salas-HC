@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 from app.models import Sala, Grade
 from app.database import SessionLocal
 from collections import defaultdict
@@ -9,6 +10,37 @@ def get_file_path(filename):
     for path in possible_paths:
         if os.path.exists(path): return path
     return None
+
+def extrair_bloco_e_andar(pavimento_raw):
+    """
+    Extrai informações precisas de strings como:
+    '1º pavimento (Térreo) Bloco E' -> Bloco: E, Andar: 0
+    '3º pavimento Bloco F' -> Bloco: F, Andar: 3
+    '1º pavimento (Térreo) Anexo' -> Bloco: ANEXO, Andar: 0
+    """
+    raw = str(pavimento_raw).strip().upper()
+    
+    # Definição do Bloco
+    if "ANEXO" in raw:
+        bloco = "ANEXO"
+    elif "BLOCO F" in raw:
+        bloco = "F"
+    elif "BLOCO E" in raw:
+        bloco = "E"
+    elif "BLOCO C" in raw:
+        bloco = "C"
+    else:
+        bloco = "E"
+
+    # Definição do Andar
+    if "TÉRREO" in raw or "TERREO" in raw:
+        andar = "0"
+    else:
+        # Pega o primeiro dígito numérico que encontrar
+        match = re.search(r'\d+', raw)
+        andar = match.group(0) if match else "0"
+
+    return bloco, andar
 
 def importar_salas_csv():
     filename = "salas.csv"
@@ -25,10 +57,11 @@ def importar_salas_csv():
     db = SessionLocal()
     
     try:
+        # Limpa tabela atual
         db.query(Sala).delete()
-        db.commit()
         
         salas_criadas = 0
+        # Contador para gerar IDs únicos sequenciais por andar
         room_counters = defaultdict(int)
         
         for index, row in df.iterrows():
@@ -38,27 +71,30 @@ def importar_salas_csv():
             if not nome_amb or nome_amb.lower() == 'nan' or not pav_raw:
                 continue
 
-            pav_upper = pav_raw.upper()
-            bloco = "E" if "E" in pav_upper else "F" if "F" in pav_upper else "ANEXO"
-            
-            if "TÉRREO" in pav_upper:
-                andar = "0"
-            else:
-                andar = ''.join(filter(str.isdigit, pav_raw.split(' ')[0]))
-                if not andar: andar = "0"
+            # Extração Robusta
+            bloco, andar = extrair_bloco_e_andar(pav_raw)
 
+            # Quantidade de salas
+            qtd_str = row.get('Número de salas existestes', '0')
             try:
-                qtd = int(float(row.get('Número de salas existestes', 0)))
+                qtd = int(float(qtd_str)) if qtd_str.lower() != 'nan' else 0
             except:
                 qtd = 0
 
             obs = str(row.get('OBS', ''))
             features = [obs] if obs and obs.lower() != 'nan' else []
+            
+            # Verifica se é obra e PADRONIZA O NOME
             em_obra = "fechado para obra" in nome_amb.lower()
+            if em_obra:
+                nome_amb = "Fechado para Obras"
 
-            for i in range(qtd):
+            # Gera as salas individuais no banco
+            for _ in range(qtd):
                 room_counters[(bloco, andar)] += 1
                 numero_sala = room_counters[(bloco, andar)]
+                
+                # ID legível: BlocoAndar-Numero
                 sala_id = f"{bloco}{andar}-{numero_sala}"
                 
                 nova_sala = Sala(
@@ -74,11 +110,15 @@ def importar_salas_csv():
                 salas_criadas += 1
         
         db.commit()
-        return {"status": "sucesso", "salas_importadas": salas_criadas}
+        return {
+            "status": "sucesso", 
+            "salas_importadas": salas_criadas, 
+            "detalhe": "Mapeamento de Blocos E, F, C e Anexo corrigido."
+        }
     
     except Exception as e:
         db.rollback()
-        return {"erro": f"Erro na importação: {str(e)}"}
+        return {"erro": f"Erro crítico na importação: {str(e)}"}
     finally:
         db.close()
 

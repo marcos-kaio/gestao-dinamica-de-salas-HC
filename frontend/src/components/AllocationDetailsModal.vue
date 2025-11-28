@@ -1,19 +1,16 @@
-{
-type: file
-filePath: frontend/src/components/AllocationDetailsModal.vue
-content:
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue'
 
-// Interface deve casar com o que enviamos do Dashboard
+// 1. Atualizar a Interface para casar com o Dashboard
 interface SalaStatus {
   id: string;
   numero: string;
-  status: 'LIVRE' | 'OCUPADA';
+  status: 'LIVRE' | 'OCUPADA' | 'MANUTENCAO'; // Adicionado MANUTENCAO
   ocupante: string | null;
   horario: string | null;
   andar: string;
   bloco: string;
+  especialidade_original?: string; // Opcional, para evitar erros se não vier
 }
 
 interface ResumoAmbulatorio {
@@ -51,7 +48,7 @@ const handleClose = () => {
              </div>
              <span class="text-sm text-gray-500">{{ data.salas_ocupadas }} ocupadas de {{ data.total_salas }} totais</span>
           </div>
-          <button @click="handleClose" class="text-gray-400 hover:text-gray-600 transition">
+          <button @click="handleClose" class="text-gray-400 hover:text-gray-600 transition cursor-pointer">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -64,13 +61,22 @@ const handleClose = () => {
             v-for="sala in data.lista_salas_detalhada" 
             :key="sala.id"
             class="flex flex-col p-4 rounded-lg border shadow-sm transition-all"
-            :class="sala.status === 'OCUPADA' ? 'bg-white border-red-200 shadow-red-100' : 'bg-white border-green-200 shadow-green-50'"
+            :class="{
+              'bg-white border-red-200 shadow-red-100': sala.status === 'OCUPADA',
+              'bg-white border-green-200 shadow-green-50': sala.status === 'LIVRE',
+              'bg-gray-100 border-gray-300 opacity-80': sala.status === 'MANUTENCAO'
+            }"
           >
             <div class="flex justify-between items-start mb-2">
                 <span class="font-bold text-lg text-gray-800">{{ sala.numero }}</span>
+                
                 <span 
                     class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-                    :class="sala.status === 'OCUPADA' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'"
+                    :class="{
+                      'bg-red-100 text-red-700': sala.status === 'OCUPADA',
+                      'bg-green-100 text-green-700': sala.status === 'LIVRE',
+                      'bg-gray-200 text-gray-600': sala.status === 'MANUTENCAO'
+                    }"
                 >
                     {{ sala.status }}
                 </span>
@@ -82,6 +88,9 @@ const handleClose = () => {
                         👤 {{ sala.ocupante || 'Médico' }}
                     </p>
                     <p class="text-xs text-gray-400 mt-1">Check-in às {{ sala.horario }}</p>
+                </div>
+                <div v-else-if="sala.status === 'MANUTENCAO'" class="text-gray-500 italic flex items-center gap-1">
+                    🚧 Em Manutenção
                 </div>
                 <div v-else class="text-gray-400 italic">
                     Disponível
@@ -100,7 +109,7 @@ const handleClose = () => {
       <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
         <button 
           @click="handleClose"
-          class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+          class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition cursor-pointer"
         >
           Fechar Detalhes
         </button>
@@ -126,4 +135,3 @@ const handleClose = () => {
   }
 }
 </style>
-}

@@ -5,7 +5,7 @@ import ManagerDetailsModal from './ManagerDetailsModal.vue'
 
 interface ResumoAmbulatorio {
   ambulatorio: string;
-  total_salas: number;
+  total_alocadas: number;
   localizacao: string[];
   lista_salas: string[];
 }
@@ -142,7 +142,7 @@ const formatLocation = (loc: string) => {
               <div class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                 {{ item.ambulatorio }}
               </div>
-              <span class="text-2xl font-bold text-gray-900">{{ item.total_salas }} <span class="text-sm font-normal text-gray-500">salas</span></span>
+              <span class="text-2xl font-bold text-gray-900">{{ item.total_alocadas }} <span class="text-sm font-normal text-gray-500">salas</span></span>
             </div>
 
             <div class="mt-auto">
