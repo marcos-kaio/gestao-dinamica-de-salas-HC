@@ -21,7 +21,6 @@ interface ResumoAmbulatorio {
 }
 
 const dashboardData = ref<ResumoAmbulatorio[]>([])
-const isLoading = ref(false)
 const lastUpdate = ref<string>('')
 const isDetailsModalOpen = ref(false)
 const selectedAllocation = ref<ResumoAmbulatorio | null>(null)
@@ -137,7 +136,7 @@ onUnmounted(() => {
                    <span v-for="loc in formatLocation(item.localizacao)" :key="loc" class="bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{{ loc }}</span>
                 </p>
               </div>
-              <div class="text-right flex-shrink-0">
+              <div class="text-right shrink-0">
                  <span class="text-2xl font-bold text-gray-800">{{ item.salas_ocupadas }}</span>
                  <span class="text-sm text-gray-400 font-medium">/{{ item.total_salas }}</span>
               </div>

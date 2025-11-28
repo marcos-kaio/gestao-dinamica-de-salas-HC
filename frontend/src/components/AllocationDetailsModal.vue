@@ -43,7 +43,7 @@ const handleClose = () => {
     
     <div class="w-full max-w-4xl rounded-xl bg-white shadow-2xl overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
       
-      <div class="p-6 border-b border-gray-100 flex-shrink-0">
+      <div class="p-6 border-b border-gray-100 shrink-0">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-3">
              <div class="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-bold text-blue-600">
