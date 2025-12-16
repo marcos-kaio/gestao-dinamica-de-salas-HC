@@ -2,6 +2,17 @@
 import { ref, onMounted } from 'vue'
 import ManagerDetailsModal from './ManagerDetailsModal.vue'
 
+// A interface AlocacaoDetalhada é crucial para guardar o ID que permite a edição
+interface AlocacaoDetalhada {
+  id_alocacao: number;
+  medico: string;
+  especialidade: string;
+  sala: string;
+  sala_id: string;
+  bloco: string;
+  andar: string;
+}
+
 interface ResumoAmbulatorio {
   ambulatorio: string;
   total_salas: number;
@@ -9,12 +20,15 @@ interface ResumoAmbulatorio {
   lista_salas: string[];
 }
 
-const allocationSummary = ref<ResumoAmbulatorio[]>([])
+// Estado da Aplicação
+const allocationSummary = ref<ResumoAmbulatorio[]>([]) // Dados resumidos para os cards
+const allDetails = ref<AlocacaoDetalhada[]>([])        // Dados completos (com IDs) para a edição
 const isLoading = ref(false)
 
-// Estado para controlar o modal de detalhes
+// Estado do Modal
 const isDetailsModalOpen = ref(false)
 const selectedAllocation = ref<ResumoAmbulatorio | null>(null)
+const selectedDetails = ref<AlocacaoDetalhada[]>([])   // Lista filtrada enviada ao modal
 
 const API_URL = 'http://localhost:8000'
 
@@ -22,8 +36,7 @@ const callApi = async (endpoint: string, method: string = 'POST') => {
   isLoading.value = true
   try {
     const response = await fetch(`${API_URL}${endpoint}`, { method })
-    const data = await response.json()
-    return data
+    return await response.json()
   } catch (error) {
     console.error(error)
     alert('Erro ao conectar com o servidor')
@@ -35,9 +48,12 @@ const callApi = async (endpoint: string, method: string = 'POST') => {
 const fetchCurrentAllocation = async () => {
   const res = await callApi('/api/alocacao/resumo', 'GET')
   
-  if (res && res.resumo_ambulatorios) {
-    console.log("Dados de Alocação Recebidos:", res.resumo_ambulatorios) // Debug: Veja no Console do navegador (F12)
-    allocationSummary.value = res.resumo_ambulatorios
+  if (res) {
+    // Guarda o resumo (Visualização Macro)
+    allocationSummary.value = res.resumo_ambulatorios || []
+    
+    // Guarda os detalhes (Para permitir a edição)
+    allDetails.value = res.alocacoes_detalhadas || []
   }
 }
 
@@ -45,41 +61,58 @@ onMounted(() => {
   fetchCurrentAllocation()
 })
 
+// Ações dos Botões
 const handleImportSalas = async () => {
   const res = await callApi('/api/setup/importar-salas')
-  if (res) alert(`Importação de Salas: ${JSON.stringify(res)}`)
-  fetchCurrentAllocation() // Atualiza a tela após importar
+  if (res) {
+    alert(`Importação: ${res.message || 'Salas importadas com sucesso!'}`)
+    fetchCurrentAllocation() 
+  }
 }
 
 const handleImportGrades = async () => {
   const res = await callApi('/api/setup/importar-grades')
-  if (res) alert(`Importação de Grades: ${JSON.stringify(res)}`)
+  if (res) alert(`Importação: ${res.message || 'Grades importadas com sucesso!'}`)
 }
 
 const handleGenerateAllocation = async () => {
   const res = await callApi('/api/alocacao/gerar')
-  if (res && res.resumo_executivo) {
-    allocationSummary.value = res.resumo_executivo
+  if (res) {
+    allocationSummary.value = res.resumo_ambulatorios || []
+    allDetails.value = res.alocacoes_detalhadas || []
   }
 }
 
+// Abertura do Modal com Filtro
 const openDetails = (item: ResumoAmbulatorio) => {
   selectedAllocation.value = item
+  
+  // Filtra na lista completa apenas os itens desta especialidade clicada
+  if (allDetails.value.length > 0) {
+    selectedDetails.value = allDetails.value.filter(
+      (detalhe) => detalhe.especialidade === item.ambulatorio
+    )
+  } else {
+    selectedDetails.value = []
+  }
+
   isDetailsModalOpen.value = true
 }
 
 const closeDetails = () => {
   isDetailsModalOpen.value = false
-  setTimeout(() => selectedAllocation.value = null, 200)
+  setTimeout(() => {
+    selectedAllocation.value = null
+    selectedDetails.value = []
+  }, 200)
 }
 
+// Formatação Visual
 const formatLocation = (loc: string) => {
   const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
   if (match) {
-    const bloco = match[1]
-    const andar = match[2]
-    const andarFormatado = andar === '0' ? 'Térreo' : `${andar}º Andar`
-    return `Bloco ${bloco} - ${andarFormatado}`
+    const andar = match[2] === '0' ? 'Térreo' : `${match[2]}º Andar`
+    return `Bloco ${match[1]} - ${andar}`
   }
   return loc
 }
@@ -100,7 +133,7 @@ const formatLocation = (loc: string) => {
         class="cursor-pointer flex items-center gap-2 rounded-lg bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition disabled:opacity-50"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-        1. Importar Salas (CSV)
+        1. Importar Salas
       </button>
 
       <button 
@@ -109,7 +142,7 @@ const formatLocation = (loc: string) => {
         class="cursor-pointer flex items-center gap-2 rounded-lg bg-purple-50 px-5 py-3 text-sm font-semibold text-purple-700 hover:bg-purple-100 transition disabled:opacity-50"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-        2. Importar Grades (AGHU)
+        2. Importar Grades
       </button>
 
       <div class="h-auto w-px bg-gray-300 mx-2"></div>
@@ -139,7 +172,6 @@ const formatLocation = (loc: string) => {
               <div class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                 {{ item.ambulatorio }}
               </div>
-              <!-- CORREÇÃO AQUI: Uso de operador ?? para garantir exibição de 0 se vier null/undefined -->
               <span class="text-2xl font-bold text-gray-900">
                 {{ item.total_salas ?? 0 }} 
                 <span class="text-sm font-normal text-gray-500">salas</span>
@@ -158,7 +190,7 @@ const formatLocation = (loc: string) => {
             
             <div class="mt-4 flex justify-end pt-2 border-t border-gray-50">
               <span class="text-xs font-medium text-blue-600 group-hover:underline flex items-center gap-1">
-                Ver detalhes
+                Ver / Editar
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
               </span>
             </div>
@@ -178,7 +210,9 @@ const formatLocation = (loc: string) => {
     <ManagerDetailsModal 
       :is-open="isDetailsModalOpen"
       :data="selectedAllocation"
+      :detailed-list="selectedDetails"
       @close="closeDetails"
+      @refresh="fetchCurrentAllocation"
     />
 
   </div>

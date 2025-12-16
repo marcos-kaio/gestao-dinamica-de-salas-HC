@@ -85,9 +85,6 @@ def gerar_alocacao_grade(db: Session):
     resultado_detalhado = []
     conflitos = []
 
-    # Ordena grades para priorizar especialidades com menos opções (opcional, mas ajuda)
-    # Por enquanto, mantemos a ordem de chegada ou ID
-
     for item_grade in grades:
         melhor_sala = None
         melhor_score = -9999
@@ -168,15 +165,9 @@ def gerar_alocacao_grade(db: Session):
     }
     
 def extrair_numero_sala(nome_visual: str) -> int:
-    """
-    Transforma 'E3-40' em 40.
-    Lógica: Pega o ÚLTIMO grupo numérico encontrado na string.
-    """
     numeros = re.findall(r'\d+', str(nome_visual))
-    
     if numeros:
         return int(numeros[-1])
-        
     return -1
 
 def descobrir_andar_predominante(db: Session, especialidade: str):
@@ -190,7 +181,6 @@ def descobrir_andar_predominante(db: Session, especialidade: str):
         return None, None
     
     lista_andares = [s.andar for s in salas_da_esp]
-    # Pega o andar mais comum na infraestrutura
     if not lista_andares: return None, None
     andar_predominante = Counter(lista_andares).most_common(1)[0][0]
     
@@ -206,10 +196,6 @@ def descobrir_andar_predominante(db: Session, especialidade: str):
     return andar_predominante, numero_alvo
 
 def calcular_afinidade_tempo_real(sala: Sala, especialidade_medico: str, andar_alvo: str, num_alvo: float) -> float:
-    """
-    Retorna uma pontuação de quão boa é a sala para essa especialidade.
-    Usado no Check-in Semi-Automático.
-    """
     esp_medico = especialidade_medico.lower().strip()
     score = 0
 
@@ -223,10 +209,9 @@ def calcular_afinidade_tempo_real(sala: Sala, especialidade_medico: str, andar_a
 
     if andar_alvo:
         if str(sala.andar).strip() == str(andar_alvo).strip():
-            score += 30  # Bônus logístico (Desempate)
+            score += 30
             if num_alvo and num_alvo > 0:
                 num_sala = extrair_numero_sala(sala.nome_visual)
-
                 if num_sala > 0:
                     distancia = abs(num_alvo - num_sala)
                     penalidade = distancia * 0.5
@@ -237,9 +222,7 @@ def calcular_afinidade_tempo_real(sala: Sala, especialidade_medico: str, andar_a
 def obter_resumo_atual(db: Session):
     """
     Recupera a alocação atual do banco de dados e formata para o Dashboard.
-    Não altera dados, apenas lê.
     """
-    # Busca todas as alocações com Join nas tabelas de Sala e Grade
     alocacoes = db.query(Alocacao, Sala, Grade)\
         .join(Sala, Alocacao.sala_id == Sala.id)\
         .join(Grade, Alocacao.grade_id == Grade.id)\
@@ -248,10 +231,10 @@ def obter_resumo_atual(db: Session):
     if not alocacoes:
         return {"resumo_ambulatorios": [], "alocacoes_detalhadas": []}
 
-    # Reconstrói a estrutura detalhada
     resultado_detalhado = []
     for aloc, sala, grade in alocacoes:
         resultado_detalhado.append({
+            "id_alocacao": aloc.id, # <--- ADICIONADO: Fundamental para a edição
             "medico": grade.nome_profissional,
             "especialidade": grade.especialidade,
             "sala": sala.nome_visual,
@@ -262,7 +245,6 @@ def obter_resumo_atual(db: Session):
             "turno": aloc.turno
         })
 
-    # Agrupamento (Lógica idêntica à de gerar_alocacao)
     agrupamento = defaultdict(lambda: {"salas_unicas": set(), "locais": set()})
 
     for item in resultado_detalhado:

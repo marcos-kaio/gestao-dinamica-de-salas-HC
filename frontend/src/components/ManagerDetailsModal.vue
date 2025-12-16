@@ -1,119 +1,141 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+import { ref, computed } from 'vue';
+import ManualEditModal from './ManualEditModal.vue';
 
-// Interface dos dados que vêm do Dashboard
-interface ResumoAmbulatorio {
-  ambulatorio: string;
-  total_salas: number;
-  localizacao: string[];
-  lista_salas: string[];
-}
-
-defineProps<{
+// Definição das Props
+const props = defineProps<{
   isOpen: boolean;
-  data: ResumoAmbulatorio | null;
-}>()
+  data: any; 
+  detailedList: any[]; 
+}>();
 
-const emit = defineEmits<{
-  (e: 'close'): void
-}>()
+const emit = defineEmits(['close', 'refresh']);
 
-// Função de formatação de localização 
-const formatLocation = (loc: string) => {
-  const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
-  if (match) {
-    const bloco = match[1]
-    const andar = match[2]
-    const andarFormatado = andar === '0' ? 'Térreo' : `${andar}º Andar`
-    return `Bloco ${bloco} - ${andarFormatado}`
+const showEdit = ref(false);
+const itemEditing = ref(null);
+const allRooms = ref([]);
+
+// Calcula quantas salas únicas existem na lista atual para exibir no cabeçalho
+const totalUniqueRooms = computed(() => {
+  if (!props.detailedList) return 0;
+  const unique = new Set(props.detailedList.map(i => i.sala));
+  return unique.size;
+});
+
+const handleEdit = async (item: any) => {
+  itemEditing.value = item;
+  if (allRooms.value.length === 0) {
+    try {
+      const res = await fetch('http://localhost:8000/api/salas');
+      allRooms.value = await res.json();
+    } catch(e) { console.error(e); }
   }
-  return loc
-}
+  showEdit.value = true;
+};
 
-const handleClose = () => {
-  emit('close')
+const confirmEdit = async (payload: any) => {
+  try {
+    const res = await fetch(`http://localhost:8000/api/alocacoes/${payload.alocacaoId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nova_sala_id: payload.novaSalaId })
+    });
+    if (res.ok) {
+      showEdit.value = false;
+      emit('refresh');
+      emit('close');
+    } else {
+      alert("Erro ao editar.");
+    }
+  } catch (e) { alert("Erro de conexão"); }
+};
+
+// Cores para os turnos ficarem visuais
+const getTurnoColor = (turno: string) => {
+  if (turno === 'MANHA') return 'bg-orange-100 text-orange-700 border-orange-200';
+  if (turno === 'TARDE') return 'bg-blue-100 text-blue-700 border-blue-200';
+  if (turno === 'NOITE') return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+  return 'bg-gray-100 text-gray-600';
 }
 </script>
 
 <template>
-  <div v-if="isOpen && data" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity p-4">
+  <div v-if="isOpen && data" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade">
     
-    <div class="w-full max-w-2xl rounded-xl bg-white shadow-2xl overflow-hidden animate-scale-in">
+    <div class="w-full max-w-4xl rounded-xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       
-      <div class="p-6 border-b border-gray-100">
-        <div class="flex items-center justify-between mb-6">
-          <div class="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-bold text-blue-600">
-            {{ data.ambulatorio }}
-          </div>
-          
-          <div class="text-2xl font-bold text-gray-900">
-            <!-- CORREÇÃO AQUI: Adicionado ?? 0 para garantir exibição -->
-            {{ data.total_salas ?? 0 }} <span class="text-sm font-normal text-gray-500">salas</span>
-          </div>
-        </div>
-
+      <div class="p-6 border-b border-gray-100 flex justify-between items-start bg-white">
         <div>
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">LOCALIZAÇÃO</p>
-          <ul class="text-sm text-gray-600 space-y-2">
-            <li v-for="loc in data.localizacao" :key="loc" class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span class="font-medium">{{ formatLocation(loc) }}</span>
-            </li>
-          </ul>
+           <div class="flex items-center gap-2 mb-2">
+             <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 uppercase tracking-wide">
+               {{ data.ambulatorio }}
+             </span>
+           </div>
+           
+           <h2 class="text-2xl font-bold text-gray-900">
+             {{ totalUniqueRooms }} salas físicas
+             <span class="text-base font-normal text-gray-400">
+               ({{ detailedList.length }} horários alocados)
+             </span>
+           </h2>
+           
+           <p class="text-sm text-gray-500 mt-1">
+             Cada bloco abaixo representa um turno de atendimento. Clique para mover.
+           </p>
         </div>
-      </div>
-
-      <div class="flex justify-center -mt-3">
-        <div class="bg-white p-1 rounded-full border border-gray-100 shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      <div class="p-6 bg-gray-50/50">
-        <p class="text-sm font-semibold text-gray-600 mb-4">Salas Alocadas:</p>
         
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          <div 
-            v-for="sala in data.lista_salas" 
-            :key="sala"
-            class="flex items-center justify-center rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm hover:border-blue-300 transition-colors cursor-default"
-          >
-            {{ sala }}
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
-        <button 
-          @click="handleClose"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition"
-        >
-          Fechar
+        <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 p-2 text-3xl leading-none transition">
+          &times;
         </button>
       </div>
 
+      <div class="p-6 bg-gray-50 overflow-y-auto custom-scroll grow">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          
+          <button 
+            v-for="item in detailedList" 
+            :key="item.id_alocacao"
+            @click="handleEdit(item)"
+            class="group relative flex flex-col items-center justify-between p-3 rounded-xl border-2 border-white bg-white shadow-sm hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer h-32"
+          >
+            <div class="w-full flex justify-center mb-1">
+              <span :class="`text-[10px] font-bold px-2 py-0.5 rounded border ${getTurnoColor(item.turno)} uppercase tracking-tighter`">
+                {{ item.dia }} • {{ item.turno }}
+              </span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <span class="text-xl font-bold text-gray-800">{{ item.sala }}</span>
+              <span class="text-[10px] text-gray-400 mt-1">
+                {{ item.andar === '0' ? 'Térreo' : item.andar + 'º Andar' }}
+              </span>
+            </div>
+
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+              <span class="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                Editar
+              </span>
+            </div>
+          </button>
+
+        </div>
+      </div>
     </div>
+
+    <ManualEditModal 
+      :show="showEdit"
+      :allocation="itemEditing"
+      :todas-salas="allRooms"
+      @close="showEdit = false"
+      @confirm="confirmEdit"
+    />
+
   </div>
 </template>
 
 <style scoped>
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+.custom-scroll::-webkit-scrollbar { width: 8px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.animate-fade { animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>

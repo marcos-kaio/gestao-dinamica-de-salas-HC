@@ -41,6 +41,11 @@ class AutoCheckInRequest(BaseModel):
     medico_nome: str
     especialidade: str
 
+# MODELO PARA EDIÇÃO MANUAL
+class AtualizarAlocacaoManual(BaseModel):
+    nova_sala_id: str
+    motivo: str = "Ajuste manual do gestor"
+
 @app.get("/")
 def read_root():
     return {"message": "API GDS Online", "status": "OK", "mode": "Grade Semanal"}
@@ -67,15 +72,44 @@ def trigger_alocacao_inteligente(teste_dia: str = None, teste_turno: str = None,
     resultado = gerar_alocacao_grade(db)
     
     qtd_ocupadas, dia_usado, turno_usado = sincronizar_status_com_alocacao(db, forcar_dia=teste_dia, forcar_turno=teste_turno)
+    
     return {
         "status": "Processamento concluído",
         "modo": "TESTE MANUAL" if teste_dia else "TEMPO REAL AUTOMÁTICO",
         "contexto_usado": f"{dia_usado} - {turno_usado}",
         "salas_ocupadas_agora": qtd_ocupadas,
         "total_alocados_semana": len(resultado["alocacoes_detalhadas"]),
-        "resumo_executivo": resultado["resumo_ambulatorios"],
-        "detalhes": resultado
+
+        "resumo_ambulatorios": resultado["resumo_ambulatorios"],
+        "alocacoes_detalhadas": resultado["alocacoes_detalhadas"],
+        
+        "resumo_executivo": resultado["resumo_ambulatorios"] 
     }
+
+# ROTA DE EDIÇÃO MANUAL 
+@app.put("/api/alocacoes/{alocacao_id}")
+def atualizar_alocacao_manual(alocacao_id: int, dados: AtualizarAlocacaoManual, db: Session = Depends(get_db)):
+    """
+    Permite ao gestor forçar a troca de sala de uma alocação específica.
+    """
+    # Busca a alocação existente
+    alocacao = db.query(Alocacao).filter(Alocacao.id == alocacao_id).first()
+    if not alocacao:
+        raise HTTPException(status_code=404, detail="Alocação não encontrada")
+
+    # Verifica se a sala nova existe
+    nova_sala = db.query(Sala).filter(Sala.id == dados.nova_sala_id).first()
+    if not nova_sala:
+        raise HTTPException(status_code=404, detail="Sala alvo não existe")
+
+    # Atualiza
+    alocacao.sala_id = dados.nova_sala_id
+    
+    db.commit()
+    db.refresh(alocacao)
+
+    return {"message": "Alocação atualizada com sucesso", "nova_sala": nova_sala.nome_visual}
+
 
 @app.post("/api/grade/adicionar")
 def adicionar_demanda_manual(demanda: NovaDemanda, db: Session = Depends(get_db)):
@@ -95,7 +129,7 @@ def adicionar_demanda_manual(demanda: NovaDemanda, db: Session = Depends(get_db)
     db.commit()
     return {"message": "Demanda adicionada à grade com sucesso! Rode a alocação novamente para incluí-lo."}
 
-# Rota para realizar CHECK-IN MANUAL (Ocupar a sala)
+# Rota para realizar CHECK-IN MANUAL 
 @app.post("/api/salas/{sala_id}/checkin")
 def realizar_checkin(sala_id: str, dados: CheckInRequest, db: Session = Depends(get_db)):
     sala = db.query(Sala).filter(Sala.id == sala_id).first()
@@ -146,7 +180,7 @@ def checkin_semiautomatico(dados: AutoCheckInRequest, db: Session = Depends(get_
             pass
 
     # Se todas as salas disponíveis forem de outras especialidades (score 0),
-    # ainda assim pegamos a primeira que estiver livre (Melhor ter sala ruim que nenhuma)
+    # ainda assim pegamos a primeira que estiver livre
     if not melhor_sala:
         melhor_sala = salas_disponiveis[0]
 
@@ -171,7 +205,7 @@ def checkin_semiautomatico(dados: AutoCheckInRequest, db: Session = Depends(get_
         "score_afinidade": maior_score
     }
 
-# Rota para realizar CHECK-OUT(desocupar sala)
+# Rota para realizar CHECK-OUT
 @app.post("/api/salas/{sala_id}/checkout")  
 def realizar_checkout(sala_id: str, db: Session = Depends(get_db)):
     sala = db.query(Sala).filter(Sala.id == sala_id).first()
@@ -209,8 +243,6 @@ def listar_salas_ociosas(db: Session = Depends(get_db)):
         "total_livres": len(salas_livres),
         "salas": salas_livres
     }
-    # Se o médico agendado chegar e encontrar alguém na sala que ele deveria ocupar, ele vai encontrar a mensagem de erro:
-    # Sala ocupada por {residente}. Dessa forma, ele deverá ocupar outra sala utilizando o listar_salas_ociosas
 
 @app.get("/api/grades")
 def listar_demanda(db: Session = Depends(get_db)):
