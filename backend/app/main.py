@@ -8,7 +8,7 @@ from collections import defaultdict
 from app.database import engine, Base, get_db
 from app.models import Sala, Grade, Alocacao
 from app.services.importer import importar_salas_csv, importar_grades_csv
-from app.core.optimizer import gerar_alocacao_grade, calcular_afinidade_tempo_real, descobrir_andar_predominante
+from app.core.optimizer import gerar_alocacao_grade, calcular_afinidade_tempo_real, descobrir_andar_predominante, obter_resumo_atual
 from app.core.time import sincronizar_status_com_alocacao, determinar_periodo_atual
 
 # Inicializa o Banco de Dados
@@ -235,3 +235,11 @@ def listar_especialidades_das_salas(db: Session = Depends(get_db)):
         mapa[chave].append(sala_id)
 
     return dict(sorted(mapa.items()))
+
+@app.get("/api/alocacao/resumo")
+def ler_alocacao_existente(db: Session = Depends(get_db)):
+    """
+    Retorna o estado atual da alocação persistida no banco.
+    Usado para carregar o Dashboard sem recalcular tudo.
+    """
+    return obter_resumo_atual(db)

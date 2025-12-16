@@ -18,6 +18,7 @@ class Sala(Base):
 
     # Colunas para auxiliar o acompanhamento em tempo real:
     ocupante_atual = Column(String, nullable=True) # Nome do médico que está ocupando a sala
+    especialidade_atual = Column(String, nullable=True)
     horario_entrada = Column(String, nullable=True) # Hora do check-in do ocupante
 
 class Grade(Base):

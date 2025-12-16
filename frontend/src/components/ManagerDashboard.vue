@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import AllocationDetailsModal from '../components/AllocationDetailsModal.vue'
+import { ref, onMounted } from 'vue'
+import ManagerDetailsModal from './ManagerDetailsModal.vue'
 
 interface ResumoAmbulatorio {
   ambulatorio: string;
@@ -32,9 +32,23 @@ const callApi = async (endpoint: string, method: string = 'POST') => {
   }
 }
 
+const fetchCurrentAllocation = async () => {
+  const res = await callApi('/api/alocacao/resumo', 'GET')
+  
+  if (res && res.resumo_ambulatorios) {
+    console.log("Dados de Alocação Recebidos:", res.resumo_ambulatorios) // Debug: Veja no Console do navegador (F12)
+    allocationSummary.value = res.resumo_ambulatorios
+  }
+}
+
+onMounted(() => {
+  fetchCurrentAllocation()
+})
+
 const handleImportSalas = async () => {
   const res = await callApi('/api/setup/importar-salas')
   if (res) alert(`Importação de Salas: ${JSON.stringify(res)}`)
+  fetchCurrentAllocation() // Atualiza a tela após importar
 }
 
 const handleImportGrades = async () => {
@@ -49,7 +63,6 @@ const handleGenerateAllocation = async () => {
   }
 }
 
-// Função para abrir o modal com os detalhes
 const openDetails = (item: ResumoAmbulatorio) => {
   selectedAllocation.value = item
   isDetailsModalOpen.value = true
@@ -57,10 +70,9 @@ const openDetails = (item: ResumoAmbulatorio) => {
 
 const closeDetails = () => {
   isDetailsModalOpen.value = false
-  setTimeout(() => selectedAllocation.value = null, 200) // Limpa após a animação
+  setTimeout(() => selectedAllocation.value = null, 200)
 }
 
-// Formatação para o Card (Preview)
 const formatLocation = (loc: string) => {
   const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
   if (match) {
@@ -81,7 +93,6 @@ const formatLocation = (loc: string) => {
       <p class="text-gray-500 mt-1">Gerenciamento de Importação e Alocação de Salas (GDS)</p>
     </header>
 
-    <!-- Barra de Ações -->
     <div class="mb-12 flex flex-wrap gap-4 rounded-xl bg-white p-6 shadow-sm border border-gray-100">
       <button 
         @click="handleImportSalas"
@@ -109,17 +120,14 @@ const formatLocation = (loc: string) => {
         class="cursor-pointer flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700 shadow-md hover:shadow-lg transition disabled:opacity-50"
       >
         <svg v-if="!isLoading" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-        <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         3. Gerar Alocação Inteligente
       </button>
     </div>
 
-    <!-- Resultados (Grid) -->
     <div v-if="allocationSummary.length > 0">
       <h2 class="text-xl font-semibold text-gray-800 mb-6">Resultado da Alocação por Especialidade</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Card -->
         <div 
           v-for="item in allocationSummary" 
           :key="item.ambulatorio"
@@ -131,7 +139,11 @@ const formatLocation = (loc: string) => {
               <div class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                 {{ item.ambulatorio }}
               </div>
-              <span class="text-2xl font-bold text-gray-900">{{ item.total_salas }} <span class="text-sm font-normal text-gray-500">salas</span></span>
+              <!-- CORREÇÃO AQUI: Uso de operador ?? para garantir exibição de 0 se vier null/undefined -->
+              <span class="text-2xl font-bold text-gray-900">
+                {{ item.total_salas ?? 0 }} 
+                <span class="text-sm font-normal text-gray-500">salas</span>
+              </span>
             </div>
 
             <div class="mt-auto">
@@ -144,7 +156,6 @@ const formatLocation = (loc: string) => {
               </ul>
             </div>
             
-            <!-- Ícone indicando ação de ver mais -->
             <div class="mt-4 flex justify-end pt-2 border-t border-gray-50">
               <span class="text-xs font-medium text-blue-600 group-hover:underline flex items-center gap-1">
                 Ver detalhes
@@ -156,7 +167,6 @@ const formatLocation = (loc: string) => {
       </div>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="!isLoading" class="mt-20 flex flex-col items-center justify-center text-center">
       <div class="rounded-full bg-gray-100 p-6 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -165,8 +175,7 @@ const formatLocation = (loc: string) => {
       <p class="text-gray-500 max-w-md mt-2">Importe as salas e as grades médicas, depois clique em "Gerar Alocação" para visualizar o planejamento.</p>
     </div>
 
-    <!-- Modal de Detalhes -->
-    <AllocationDetailsModal 
+    <ManagerDetailsModal 
       :is-open="isDetailsModalOpen"
       :data="selectedAllocation"
       @close="closeDetails"
