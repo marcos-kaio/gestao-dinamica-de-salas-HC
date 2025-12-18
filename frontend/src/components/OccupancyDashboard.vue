@@ -37,21 +37,13 @@ const fetchDashboardRealTime = async () => {
     const agrupamento = new Map<string, ResumoAmbulatorio>()
 
     salas.forEach((sala: any) => {
-      // REGRA DE OURO DO MONITORAMENTO:
-      // Se ocupada, o "dono" do grupo é a especialidade do médico (especialidade_atual).
-      // Se livre, o "dono" é a especialidade original da sala (especialidade_preferencial).
-      
-      let chaveGrupo = "Salas Gerais";
-      
-      if (sala.status_atual === 'OCUPADA' && sala.especialidade_atual) {
-          chaveGrupo = sala.especialidade_atual.trim();
-      } else if (sala.especialidade_preferencial) {
-          chaveGrupo = sala.especialidade_preferencial.trim();
-      }
-      
-      if (!agrupamento.has(chaveGrupo)) {
-        agrupamento.set(chaveGrupo, {
-          ambulatorio: chaveGrupo,
+      const esp = (sala.status_atual === 'OCUPADA' && sala.ocupante_atual) 
+          ? 'Em Atendimento' // Simplificação para demo, idealmente usaria a especialidade da alocação
+          : (sala.especialidade_preferencial || 'Clínica Médica');
+
+      if (!agrupamento.has(esp)) {
+        agrupamento.set(esp, {
+          ambulatorio: esp,
           total_salas: 0,
           salas_ocupadas: 0,
           localizacao: [],
@@ -59,35 +51,40 @@ const fetchDashboardRealTime = async () => {
         })
       }
 
-      const grupo = agrupamento.get(chaveGrupo)!
-      
-      // Contabiliza
+      const grupo = agrupamento.get(esp)!
       grupo.total_salas++
       if (sala.status_atual === 'OCUPADA') grupo.salas_ocupadas++
-
-      // Formata Local
-      const loc = `Bloco ${sala.bloco} - ${sala.andar === '0' ? 'Térreo' : sala.andar + 'º'}`
+      
+      const loc = `Bloco ${sala.bloco} - ${sala.andar}`
       if (!grupo.localizacao.includes(loc)) grupo.localizacao.push(loc)
 
       grupo.lista_salas_detalhada.push({
         id: sala.id,
         numero: sala.nome_visual,
-        status: sala.is_maintenance ? 'MANUTENCAO' : sala.status_atual,
+        status: sala.status_atual === 'EM_MANUTENCAO' ? 'MANUTENCAO' : sala.status_atual,
         ocupante: sala.ocupante_atual,
-        horario: sala.horario_entrada,
+        horario: null,
         andar: sala.andar,
         bloco: sala.bloco
       })
     })
 
-    // Ordena: Quem tem mais gente trabalhando aparece primeiro
-    dashboardData.value = Array.from(agrupamento.values()).sort((a, b) => b.salas_ocupadas - a.salas_ocupadas)
-    
-    lastUpdate.value = new Date().toLocaleTimeString()
-  } catch (e) {
-    console.error(e)
+    dashboardData.value = Array.from(agrupamento.values()).sort((a, b) => b.total_salas - a.total_salas)
+    lastUpdate.value = new Date().toLocaleTimeString('pt-BR')
+
+  } catch (error) {
+    console.error("Erro no polling:", error)
   }
 }
+
+onMounted(() => {
+  fetchDashboardRealTime()
+  pollingInterval = setInterval(fetchDashboardRealTime, 5000)
+})
+
+onUnmounted(() => {
+  if (pollingInterval) clearInterval(pollingInterval)
+})
 
 const openDetails = (item: ResumoAmbulatorio) => {
   selectedAllocation.value = item
@@ -100,84 +97,66 @@ const closeDetails = () => {
 }
 
 const formatLocation = (locs: string[]) => {
-  if (locs.length <= 2) return locs
-  return [...locs.slice(0, 2), `+${locs.length - 2}`]
+  if (!locs || locs.length === 0) return []
+  return locs.map(loc => {
+    const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
+    return match ? `Bloco ${match[1]} • ${match[2] === '0' ? 'Térreo' : match[2] + 'º Andar'}` : loc
+  })
 }
-
-onMounted(() => {
-  fetchDashboardRealTime()
-  pollingInterval = setInterval(fetchDashboardRealTime, 5000)
-})
-
-onUnmounted(() => {
-  if (pollingInterval) clearInterval(pollingInterval)
-})
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans text-gray-900 pb-20">
-    <header class="bg-indigo-600 text-white p-6 shadow-md rounded-b-3xl mb-8">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold">Monitoramento de Ocupação</h1>
-          <p class="text-indigo-100 text-sm">Visão em tempo real agrupada por equipe ativa</p>
-        </div>
-        <div class="bg-indigo-700/50 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium border border-indigo-500/30">
-          <span class="text-indigo-50">Última atualização: {{ lastUpdate }}</span>
-        </div>
+  <div class="animate-fade-in">
+    <div class="mb-8 flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          Monitoramento em Tempo Real
+        </h2>
+        <p class="text-slate-500 text-sm mt-1 ml-5">Status operacional das salas ambulatoriais</p>
       </div>
-    </header>
+      <div class="text-right">
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Última Atualização</div>
+        <div class="text-xl font-mono font-medium text-slate-700">{{ lastUpdate || '--:--:--' }}</div>
+      </div>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4">
-      <div v-if="dashboardData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        <div 
-          v-for="item in dashboardData" 
-          :key="item.ambulatorio"
-          @click="openDetails(item)"
-          class="group bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition cursor-pointer relative overflow-hidden"
-        >
-          <div class="absolute left-0 top-0 bottom-0 w-1 transition-colors" 
-               :class="item.salas_ocupadas > 0 ? 'bg-indigo-500' : 'bg-gray-300'"></div>
-
-          <div class="pl-3 flex flex-col h-full">
-            <div class="flex justify-between items-start mb-3">
-              <div class="pr-2 overflow-hidden">
-                <h4 class="font-bold text-gray-900 truncate" :title="item.ambulatorio">{{ item.ambulatorio }}</h4>
-                <p class="text-[10px] text-gray-500 mt-1 truncate">
-                   {{ formatLocation(item.localizacao).join(', ') }}
-                </p>
-              </div>
-              <div class="text-right shrink-0">
-                 <div class="text-2xl font-bold text-gray-800 leading-none">{{ item.salas_ocupadas }}</div>
-                 <div class="text-[10px] text-gray-400 font-medium uppercase">Ativos</div>
-              </div>
+    <div v-if="dashboardData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div v-for="item in dashboardData" :key="item.ambulatorio" @click="openDetails(item)" class="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden flex flex-col h-full">
+        <div class="h-1 w-full bg-indigo-500"></div>
+        <div class="p-5 flex-1 flex flex-col">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex-1 pr-2">
+              <h4 class="font-bold text-slate-800 text-base leading-tight line-clamp-1" :title="item.ambulatorio">{{ item.ambulatorio }}</h4>
+              <p class="text-[11px] text-slate-500 mt-1 truncate font-medium">{{ formatLocation(item.localizacao)[0] }}</p>
             </div>
+            <div class="text-right shrink-0">
+               <div class="text-2xl font-bold text-slate-800 leading-none">{{ item.salas_ocupadas }}</div>
+               <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wide mt-0.5">Ativos</div>
+            </div>
+          </div>
 
-            <div class="mt-auto pt-2">
-              <div class="flex justify-between text-[10px] font-bold uppercase text-gray-400 mb-1">
-                  <span>Ocupação</span>
-                  <span>{{ Math.round((item.salas_ocupadas / item.total_salas) * 100) }}%</span>
-              </div>
-              <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                      class="h-1.5 rounded-full transition-all duration-500 bg-indigo-500"
-                      :style="{ width: `${(item.salas_ocupadas / item.total_salas) * 100}%` }"
-                  ></div>
-              </div>
+          <div class="mt-auto">
+            <div class="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-1.5">
+                <span>Taxa de Ocupação</span>
+                <span>{{ Math.round((item.salas_ocupadas / item.total_salas) * 100) || 0 }}%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500 bg-indigo-500" :style="{ width: `${(item.salas_ocupadas / item.total_salas) * 100}%` }"></div>
             </div>
           </div>
         </div>
       </div>
-      
-      <div v-else class="text-center py-20 text-gray-500">
-        Carregando dados...
-      </div>
-    </main>
+    </div>
+    
+    <div v-else class="flex flex-col items-center justify-center py-20 text-slate-400">
+      <svg class="w-12 h-12 mb-4 animate-pulse text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      <span class="text-sm font-medium">Conectando ao servidor...</span>
+    </div>
 
-    <AllocationDetailsModal 
-      :is-open="isDetailsModalOpen"
-      :data="selectedAllocation"
-      @close="closeDetails"
-    />
+    <AllocationDetailsModal :is-open="isDetailsModalOpen" :data="selectedAllocation" @close="closeDetails" />
   </div>
 </template>
