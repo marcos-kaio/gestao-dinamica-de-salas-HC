@@ -18,7 +18,6 @@ def get_file_path(filename):
     return None
 
 def normalize_text(text):
-    """Padroniza texto: SEM ACENTOS e UPPERCASE"""
     if not isinstance(text, str): return ""
     text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
     return text.upper().strip()
@@ -27,7 +26,9 @@ def normalize_text(text):
 MAPPING_RULES = [
     ("TELEMEDICINA", "IGNORAR"), ("TELEENFERMAGEM", "IGNORAR"), ("TELEFONOAUDIOLOGIA", "IGNORAR"),
     ("TELENUTRICAO", "IGNORAR"), ("TELETERAPIA", "IGNORAR"), ("TELECONSULTA", "IGNORAR"),
-    ("TELE-TRIAGEM", "IGNORAR"), ("NAVEGACAO", "IGNORAR"),
+    ("NAVEGACAO", "IGNORAR"),
+    
+    # Especialidades
     ("BRONCOSCOPIA", "PNEUMOLOGIA"),
     ("HEMODIALISE", "NEFROLOGIA"), ("TRANSPLANTE RENAL", "NEFROLOGIA"),
     ("PALIATIVOS", "CLINICA MEDICA/ GERIATRIA/ DOR"),
@@ -64,6 +65,8 @@ MAPPING_RULES = [
     ("GASTRO", "GASTRO"), ("PROCTOLOGIA", "GASTRO"),
     ("REUMATOLOGIA", "REUMATOLOGIA"), ("REUMATO", "REUMATOLOGIA"),
     ("LUPUS", "REUMATOLOGIA"), ("GOTA", "REUMATOLOGIA"), ("ARTRITE", "REUMATOLOGIA"),
+    
+    # Apoio
     ("ALERGIA", "PNEUMOLOGIA"), ("IMUNOLOGIA", "PNEUMOLOGIA"),
     ("NUTRICAO", "ENDOCRINOLOGIA"), 
     ("PSICOLOGIA", "PSIQUIATRIA"),
@@ -76,10 +79,14 @@ MAPPING_RULES = [
     ("ACUPUNTURA", "CLINICA MEDICA/ GERIATRIA/ DOR"),
     ("RADIOLOGIA", "CLINICA MEDICA/ GERIATRIA/ DOR"),
     ("PESQUISA", "CLINICA MEDICA/ GERIATRIA/ DOR"), ("ESTOMIAS", "CIRURGIA GERAL"),
+
+    # Generalistas
     ("CLINICA MEDICA", "CLINICA MEDICA/ GERIATRIA/ DOR"),
     ("CLINICA GERAL", "CLINICA MEDICA/ GERIATRIA/ DOR"),
     ("GERIATRIA", "CLINICA MEDICA/ GERIATRIA/ DOR"), ("DOR", "CLINICA MEDICA/ GERIATRIA/ DOR"),
     ("HOSPITAL-DIA", "CLINICA MEDICA/ GERIATRIA/ DOR"), ("TRIAGEM", "CLINICA MEDICA/ GERIATRIA/ DOR"),
+    
+    # Genéricos
     ("CIRURGIA GERAL", "CIRURGIA GERAL"), ("CIRURGIA", "CIRURGIA GERAL"),
     ("ENFERMAGEM", "IGNORAR"), ("FARMACIA", "IGNORAR"),
 ]
@@ -91,16 +98,23 @@ def map_specialty(specialty_raw):
     return "NAO MAPEADO"
 
 def extrair_bloco_e_andar(pavimento_raw):
+    # REGRA DE OURO: Só aceita se tiver BLOCO ou ANEXO escrito explicitamente
     raw = normalize_text(pavimento_raw)
+    
+    bloco = None
     if "ANEXO" in raw: bloco = "ANEXO"
     elif "BLOCO F" in raw: bloco = "F"
     elif "BLOCO E" in raw: bloco = "E"
     elif "BLOCO C" in raw: bloco = "C"
-    else: bloco = "E"
+    
+    # Se não identificou, retorna None. Isso mata a linha de TOTAL.
+    if bloco is None: return None, None
+
     if "TERREO" in raw: andar = "0"
     else:
         match = re.search(r'\d+', raw)
         andar = match.group(0) if match else "0"
+    
     return bloco, andar
 
 def importar_salas_csv():
@@ -109,8 +123,8 @@ def importar_salas_csv():
     if not csv_path: return {"erro": f"Arquivo '{filename}' não encontrado."}
 
     try: 
-        # Lê o CSV. Pandas já identifica NaN para células vazias.
-        df = pd.read_csv(csv_path)
+        # Lê tudo como string
+        df = pd.read_csv(csv_path, dtype=str)
     except Exception as e: return {"erro": f"Erro ao ler CSV: {str(e)}"}
 
     db = SessionLocal()
@@ -120,26 +134,26 @@ def importar_salas_csv():
         room_counters = defaultdict(int)
         
         for _, row in df.iterrows():
-            nome_raw = row.get('Nome do ambulatório')
-            pav_raw = row.get('Pavimento')
+            nome_raw = str(row.get('Nome do ambulatório', ''))
+            pav_raw = str(row.get('Pavimento', ''))
+            qtd_raw = str(row.get('Número de salas existestes', '0'))
             
-            # --- FILTRO ANTIFANTASMA INFALÍVEL ---
-            # Se o nome for nulo (NaN), ignora. Isso mata a linha 34 (Total: 255).
-            if pd.isna(nome_raw): continue
-            if pd.isna(pav_raw): continue
-            
-            # Converte para string limpa
-            nome_clean = normalize_text(str(nome_raw))
+            # --- FILTROS DE LIMPEZA ---
+            nome_clean = normalize_text(nome_raw)
+            # 1. Nome Vazio ou Total
             if not nome_clean or nome_clean == 'NAN' or "TOTAL" in nome_clean: continue
+            
+            # 2. Pavimento Vazio
+            if not pav_raw or normalize_text(pav_raw) == 'NAN': continue
+            
+            # 3. Extração de Local (Mata a linha fantasma aqui se ela passou pelo nome)
+            bloco, andar = extrair_bloco_e_andar(pav_raw)
+            if bloco is None: continue 
 
+            # 4. Quantidade Absurda
             try:
-                # Tenta ler a quantidade
-                val = row.get('Número de salas existestes', 0)
-                if pd.isna(val): qtd = 0
-                else: qtd = int(float(val))
-                
-                # Trava extra: 60 salas é o teto para um ambulatório
-                if qtd > 60: continue 
+                qtd = int(float(qtd_raw.replace(',', '.')))
+                if qtd > 60: continue # Nenhum setor tem mais de 60 salas
             except: qtd = 0
 
             if qtd <= 0: continue
@@ -147,13 +161,12 @@ def importar_salas_csv():
             caracteristica = normalize_text(str(row.get('Característica', '')))
             is_specialized = "ESPECIALIZADO" in caracteristica
             
-            bloco, andar = extrair_bloco_e_andar(str(pav_raw))
             is_obra = "FECHADO PARA OBRA" in nome_clean or "FECHADO PARA OBRAS" in nome_clean
             if is_obra: nome_clean = "FECHADO PARA OBRAS"
 
             obs = str(row.get('OBS', ''))
             features = []
-            if not pd.isna(obs): features.append(str(obs))
+            if normalize_text(obs) != 'NAN' and normalize_text(obs) != '': features.append(obs)
             if is_specialized: features.append("RESTRICTED_SPECIALTY")
 
             for _ in range(qtd):
@@ -194,7 +207,7 @@ def importar_grades_csv():
     
     try: 
         df = pd.read_csv(path)
-        # Remove duplicatas exatas (erro de cópia)
+        # Deduplicação apenas de linhas idênticas
         df.drop_duplicates(inplace=True)
     except Exception as e: return {"erro": f"Erro ao ler CSV: {str(e)}"}
 

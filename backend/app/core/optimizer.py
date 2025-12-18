@@ -45,7 +45,7 @@ def calcular_score(grade: Grade, sala: Sala, cluster_ideal: tuple = None) -> int
         if sala_esp == "NAO MAPEADO": return 50
         return -800 
     
-    # 2. SALA ESPECIALIZADA (Prioridade Máxima)
+    # 2. SALA ESPECIALIZADA
     if is_restricted:
         if sala_esp == grade_esp: return 10000 
         else: return -999999 
@@ -58,14 +58,14 @@ def calcular_score(grade: Grade, sala: Sala, cluster_ideal: tuple = None) -> int
     if cluster_ideal:
         bloco_ideal, andar_ideal = cluster_ideal
         if sala.bloco == bloco_ideal and str(sala.andar) == str(andar_ideal):
-            score += 300
+            score += 500
         elif sala.bloco == bloco_ideal:
-            score += 100
+            score += 200
     
     # 5. REGRAS FÍSICAS
     if "ORTOPEDIA" in grade_esp:
-        if str(sala.andar) == "0": score += 2000
-        else: score -= 2000
+        if str(sala.andar) == "0": score += 3000
+        else: score -= 3000
     if "OFTALMO" in grade_esp and "OFTALMO" not in sala_esp:
         score -= 5000 
 
@@ -84,7 +84,7 @@ def gerar_alocacao_grade(db: Session):
     
     if not grades or not salas: return {"erro": "Sem dados"}
     
-    # CONTADOR REAL DE SALAS ATIVAS (aprox 193)
+    # CONTAGEM RIGOROSA DE SALAS FÍSICAS
     TOTAL_SALAS_FISICAS = len(salas)
 
     cluster_map = identificar_clusters_preferenciais(grades, salas)
@@ -115,12 +115,11 @@ def gerar_alocacao_grade(db: Session):
         
         # --- TRAVA DE CAPACIDADE FÍSICA ---
         if dia in ocupacao and turno in ocupacao[dia]:
-            # Se a lotação física for atingida, para imediatamente.
             if len(ocupacao[dia][turno]) >= TOTAL_SALAS_FISICAS:
                 conflitos.append({
                     "medico": item_grade.nome_profissional,
                     "especialidade": item_grade.especialidade,
-                    "motivo": "Lotação Máxima do Hospital Atingida"
+                    "motivo": f"Lotação Máxima Atingida ({TOTAL_SALAS_FISICAS} salas)"
                 })
                 continue
 
@@ -173,8 +172,13 @@ def gerar_alocacao_grade(db: Session):
             
     db.commit()
 
+    return construir_resumo_json(resultado_detalhado, conflitos)
+
+def construir_resumo_json(detalhes, conflitos):
+    """Função compartilhada para gerar o JSON do Dashboard."""
     agrupamento = defaultdict(lambda: {"salas_unicas": set(), "locais": set(), "qtd_profissionais": 0})
-    for item in resultado_detalhado:
+    
+    for item in detalhes:
         esp = item['especialidade']
         agrupamento[esp]['salas_unicas'].add(item['sala'])
         agrupamento[esp]['qtd_profissionais'] += 1
@@ -195,14 +199,15 @@ def gerar_alocacao_grade(db: Session):
     resumo_final.sort(key=lambda x: x['total_salas'], reverse=True)
 
     return {
-        "resumo_ambulatorios": resumo_final,
-        "alocacoes_detalhadas": resultado_detalhado,
-        "conflitos": conflitos,
-        "total_alocados": len(resultado_detalhado),
-        "total_conflitos": len(conflitos)
+        "status": "Processamento concluído",
+        "total_alocados_semana": len(detalhes),
+        "total_conflitos": len(conflitos),
+        "resumo_ambulatorios": resumo_final, # Campo esperado pelo frontend
+        "resumo_executivo": resumo_final,    # Compatibilidade com versão antiga
+        "alocacoes_detalhadas": detalhes,
+        "conflitos": conflitos
     }
 
-# (Funções de suporte)
 def descobrir_andar_predominante(db: Session, especialidade: str):
     if not especialidade: return None, None
     term = especialidade.upper().strip()
@@ -223,7 +228,15 @@ def calcular_afinidade_tempo_real(sala: Sala, especialidade_medico: str, andar_a
     return round(score, 1)
 
 def obter_resumo_atual(db: Session):
+    """
+    Reconstrói o JSON completo a partir do Banco de Dados.
+    Essencial para persistência (F5).
+    """
     alocacoes = db.query(Alocacao, Sala, Grade).join(Sala).join(Grade).all()
+    
+    if not alocacoes:
+        return {"resumo_ambulatorios": [], "alocacoes_detalhadas": []}
+
     resultado_detalhado = []
     for aloc, sala, grade in alocacoes:
         resultado_detalhado.append({
@@ -233,6 +246,9 @@ def obter_resumo_atual(db: Session):
             "bloco": sala.bloco,
             "andar": sala.andar,
             "dia": aloc.dia_semana,
-            "turno": aloc.turno
+            "turno": aloc.turno,
+            "score": aloc.score
         })
-    return {"alocacoes_detalhadas": resultado_detalhado}
+    
+    # Reutiliza a lógica de construção para garantir formato idêntico
+    return construir_resumo_json(resultado_detalhado, [])
