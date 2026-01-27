@@ -4,7 +4,6 @@ from collections import defaultdict
 from app.core.time import get_horario_atual
 import re
 
-# ... (Mantenha as funções auxiliares: natural_sort_key, normalizar, calcular_score) ...
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower()
             for text in re.split('([0-9]+)', s)]
@@ -38,7 +37,6 @@ def calcular_score(grade: Grade, sala: Sala, zona_preferencial: dict) -> int:
         else: score -= 300
     return score
 
-# ... (Mantenha gerar_alocacao_grade igual) ...
 def gerar_alocacao_grade(db: Session):
     db.query(Alocacao).delete()
     grades = db.query(Grade).all()
@@ -78,7 +76,6 @@ def gerar_alocacao_grade(db: Session):
     db.commit()
     return {"resumo_ambulatorios": obter_resumo_atual(db), "conflitos": conflitos}
 
-# ... (Mantenha obter_resumo_atual, listar_opcoes_troca, aplicar_troca_manual iguais) ...
 def obter_resumo_atual(db: Session):
     dados = db.query(Alocacao, Sala, Grade, Especialidade).join(Sala, Alocacao.sala_id == Sala.id).join(Grade, Alocacao.grade_id == Grade.id).outerjoin(Especialidade, Grade.especialidade_id == Especialidade.id).all()
     agrupamento = defaultdict(lambda: {"salas_unicas": set(), "locais": set(), "detalhes": []})
@@ -116,13 +113,12 @@ def aplicar_troca_manual(alocacao_id: int, nova_sala_id: str, db: Session):
     db.commit()
     return True
 
-# --- NOVA FUNÇÃO DE MONITORAMENTO ---
+# função de monitoramento
 def obter_dashboard_tempo_real(db: Session):
     tempo = get_horario_atual()
     dia = tempo['dia']
     turno = tempo['turno']
     
-    # Busca todas as salas
     salas = db.query(Sala).all()
     
     # Busca alocações APENAS do momento atual

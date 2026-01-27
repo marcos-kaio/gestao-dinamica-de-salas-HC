@@ -25,18 +25,13 @@ const ambulatoriosAgrupados = computed(() => {
   const grupos: Record<string, any> = {}
   
   dadosTempoReal.value.salas.forEach((sala: any) => {
-    // Se estiver ocupada, usa a especialidade do ocupante
-    // Se estiver livre, tenta usar a especialidade preferencial (se tivéssemos esse dado no flat list)
-    // Como o endpoint realtime é focado em status, vamos agrupar por Bloco/Andar para salas livres ou manter "Geral"
-    
-    // Melhor abordagem: Agrupar pelo ocupante se houver, ou "Salas Livres/Manutenção" se não
+    // lógica de agrupamento de salas por especialidades e status
     let chave = "Disponíveis / Outros"
     if (sala.status === 'OCUPADA' && sala.ocupante) {
       chave = sala.ocupante.especialidade || "Alocação Geral"
     } else if (sala.status === 'MANUTENCAO') {
       chave = "Manutenção"
     } else {
-        // Salas livres: Tenta inferir pelo nome ou joga em Disponíveis
         chave = "Salas Disponíveis"
     }
 
@@ -68,8 +63,6 @@ onUnmounted(() => {
 
 <template>
   <div class="p-6 bg-gray-50 min-h-screen">
-    
-    <!-- Cabeçalho (Mantido o novo com stats) -->
     <div class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
       <div>
         <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -102,7 +95,6 @@ onUnmounted(() => {
       Carregando mapa do hospital...
     </div>
 
-    <!-- Grid de Cards (Estilo Antigo) -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       
       <div 
@@ -110,7 +102,6 @@ onUnmounted(() => {
         :key="grupo.nome"
         class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
       >
-        <!-- Header do Card -->
         <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-sm uppercase truncate pr-2" :title="grupo.nome">
             {{ grupo.nome }}

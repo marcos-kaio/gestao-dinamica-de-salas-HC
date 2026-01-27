@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
-// --- Tipos ---
-
 // Interface para o objeto retornado por /dashboard/agora (status em tempo real)
 interface SalaStatus {
   sala_id: string;
@@ -29,20 +27,20 @@ interface SalaBackend extends SalaStatus {
 const medicoNome = ref('')
 const especialidade = ref('')
 
-// Lista de seleção para o médico (Nomes amigáveis)
+// Lista de seleção para o médico
 const especialidadesDisponiveis = [
   "CARDIOLOGIA", "PEDIATRIA", "ORTOPEDIA", "GINECOLOGIA", 
   "DERMATOLOGIA", "NEUROLOGIA", "GASTROENTEROLOGIA", 
   "CIRURGIA GERAL", "ONCOLOGIA", "NEFROLOGIA", "UROLOGIA",
   "OFTALMOLOGIA", "OTORRINOLARINGOLOGIA", "PSIQUIATRIA",
-  "OTORRINO", "GINECO", "OBSTETRICIA" // Adicionando variações comuns na lista
+  "OTORRINO", "GINECO", "OBSTETRICIA"
 ]
 
-// Mapa de Sinônimos para Normalização (Frontend)
+// Mapa de Sinônimos para Normalização
 const mapaSinonimos: Record<string, string> = {
   "OTORRINO": "OTORRINOLARINGOLOGIA",
   "GINECO": "GINECOLOGIA",
-  "OBSTETRICIA": "GINECOLOGIA", // Muitas vezes compartilham
+  "OBSTETRICIA": "GINECOLOGIA",
   "DERMATO": "DERMATOLOGIA",
   "NEURO": "NEUROLOGIA",
   "CARDIO": "CARDIOLOGIA",
@@ -61,7 +59,6 @@ const history = ref<any[]>([])
 
 const API_URL = 'http://localhost:8000/api'
 
-// --- Helpers de Normalização ---
 
 // Normaliza a entrada do usuário para bater com o cadastro oficial da sala
 const normalizarEspecialidade = (texto: string): string => {
@@ -70,8 +67,6 @@ const normalizarEspecialidade = (texto: string): string => {
   // Retorna o sinônimo oficial ou o próprio texto se não houver mapeamento
   return mapaSinonimos[upper] || upper
 }
-
-// --- Computados (A Mágica da Recomendação) ---
 
 const salasLivres = computed(() => {
   return todasSalasCarregadas.value.filter(s => s.status === 'LIVRE')
@@ -85,18 +80,17 @@ const salasOcupadas = computed(() => {
 const salasRecomendadas = computed(() => {
   const lista = [...salasLivres.value]
   
-  // Normaliza o que o médico selecionou (Ex: "Otorrino" vira "OTORRINOLARINGOLOGIA")
+  // Normaliza a seleção do médico
   const espAlvo = normalizarEspecialidade(especialidade.value)
 
   if (!espAlvo) return lista 
 
   return lista.sort((a, b) => {
-    // Normaliza a preferência da sala (Ex: "Otorrinolaringologia" vira upper)
+    // Normaliza a preferência da sala
     const prefA = (a.especialidade_preferencial || '').toUpperCase()
     const prefB = (b.especialidade_preferencial || '').toUpperCase()
 
     // Verifica se a especialidade alvo está contida na preferência da sala
-    // Ex: "OTORRINOLARINGOLOGIA" está em "OTORRINOLARINGOLOGIA"? Sim.
     const matchA = prefA.includes(espAlvo) || espAlvo.includes(prefA)
     const matchB = prefB.includes(espAlvo) || espAlvo.includes(prefB)
 
@@ -117,8 +111,6 @@ const isRecomendada = (sala: SalaBackend) => {
   // Match bidirecional para pegar casos parciais
   return pref.includes(espAlvo) || (espAlvo.length > 3 && espAlvo.includes(pref))
 }
-
-// --- Funções de API ---
 
 const fetchSalasTempoReal = async () => {
   isLoading.value = true
@@ -148,9 +140,7 @@ const fetchSalasTempoReal = async () => {
   }
 }
 
-// --- Ações ---
-
-// 1. Check-in Inteligente (Automático)
+// Check-in Inteligente (Automático)
 const handleSmartCheckin = async () => {
   if (!medicoNome.value || !especialidade.value) {
     alert("Por favor, preencha seu Nome e Especialidade.")
@@ -182,7 +172,7 @@ const handleSmartCheckin = async () => {
   }, 1200)
 }
 
-// 2. Check-in Manual
+// Check-in Manual
 const handleManualCheckin = async (salaId: string) => {
   if (!medicoNome.value) {
     alert("Por favor, identifique-se com seu nome.")
@@ -204,7 +194,7 @@ const handleManualCheckin = async (salaId: string) => {
   }, 600)
 }
 
-// 3. Checkout
+// Checkout
 const handleCheckout = async (salaId: string) => {
   if(!confirm("Liberar esta sala?")) return;
   isLoading.value = true
@@ -242,7 +232,6 @@ onMounted(() => {
 <template>
   <div class="p-6 bg-gray-50 min-h-screen font-sans animate-fade-in">
     
-    <!-- Header: Estilo unificado com as outras telas -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-800">Portal do Profissional</h1>
@@ -251,8 +240,6 @@ onMounted(() => {
     </div>
 
     <main class="max-w-4xl mx-auto px-4">
-      
-      <!-- Identificação (Sempre visível) -->
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 transition-shadow hover:shadow-md">
         <div class="flex items-center gap-2 mb-4">
           <span class="text-xl">🪪</span>
@@ -312,10 +299,7 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- CONTEÚDO CHECK-IN -->
       <div v-if="currentTab === 'checkin'">
-        
-        <!-- Seleção de Modo (Cards Grandes) -->
         <div v-if="!checkinMode" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
             
             <!-- Card Automático -->

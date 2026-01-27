@@ -6,7 +6,6 @@ def get_horario_atual():
     tz = pytz.timezone('America/Recife')
     agora = datetime.now(tz)
     
-    # Mapeamento Python (0=Seg, 6=Dom) para padrão GDS (SEG, TER...)
     dias = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM']
     dia_atual = dias[agora.weekday()]
     

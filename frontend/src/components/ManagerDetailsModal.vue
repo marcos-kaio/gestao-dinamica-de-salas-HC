@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// defineProps is a macro, no import needed
 const props = defineProps<{
   data: any,
   isOpen: boolean

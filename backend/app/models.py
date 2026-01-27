@@ -8,7 +8,6 @@ class Turno(str, enum.Enum):
     TARDE = "T"
     NOITE = "N"
 
-# --- NOVA TABELA OBRIGATÓRIA ---
 class Especialidade(Base):
     __tablename__ = "especialidades"
     id = Column(Integer, primary_key=True, index=True)
