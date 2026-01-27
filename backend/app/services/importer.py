@@ -102,9 +102,6 @@ def map_specialty(specialty_raw):
 def extrair_bloco_e_andar(pavimento_raw):
     raw = normalize_text(pavimento_raw)
     
-    # --- REGRA DE FERRO: SEM LOCAL, SEM SALA ---
-    # Se não tiver 'BLOCO' ou 'ANEXO', retorna None.
-    # Isso mata a linha de TOTAL imediatamente.
     bloco = None
     if "ANEXO" in raw: bloco = "ANEXO"
     elif "BLOCO F" in raw: bloco = "F"
@@ -211,8 +208,14 @@ def importar_grades_csv():
     
     try: 
         df = pd.read_csv(path)
-        # Remove duplicatas exatas
-        df.drop_duplicates(inplace=True)
+        
+        # remoção de duplicatas
+        colunas_chave = {'nome', 'dia_semana', 'turno'}
+        if colunas_chave.issubset(df.columns):
+            df.drop_duplicates(subset=['nome', 'dia_semana', 'turno'], keep='first', inplace=True)
+        else:
+            df.drop_duplicates(inplace=True)
+
     except Exception as e: return {"erro": f"Erro ao ler CSV: {str(e)}"}
 
     db = SessionLocal()

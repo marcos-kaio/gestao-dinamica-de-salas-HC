@@ -1,205 +1,158 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import AllocationDetailsModal from '../components/AllocationDetailsModal.vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
-interface SalaStatus {
-  id: string;
-  numero: string;
-  status: 'LIVRE' | 'OCUPADA' | 'MANUTENCAO';
-  ocupante: string | null;
-  horario: string | null;
-  andar: string;
-  bloco: string;
-}
-
-interface ResumoAmbulatorio {
-  ambulatorio: string;
-  total_salas: number;
-  salas_ocupadas: number;
-  localizacao: string[];
-  lista_salas_detalhada: SalaStatus[];
-}
-
-const dashboardData = ref<ResumoAmbulatorio[]>([])
-const lastUpdate = ref<string>('')
-const isDetailsModalOpen = ref(false)
-const selectedAllocation = ref<ResumoAmbulatorio | null>(null)
-
-const API_URL = 'http://localhost:8000'
-let pollingInterval: number | null = null;
-
-// Normaliza strings para garantir agrupamento correto
-const normalize = (text: string | null | undefined) => {
-  if (!text) return "SALAS GERAIS / INDEFINIDO";
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
-}
+const dadosTempoReal = ref<any>(null)
+const loading = ref(true)
+let intervalo: any = null
 
 const fetchDashboardRealTime = async () => {
   try {
-    const res = await fetch(`${API_URL}/api/salas`)
-    const salas = await res.json()
-    if (!salas) return
-
-    const agrupamento = new Map<string, ResumoAmbulatorio>()
-
-    salas.forEach((sala: any) => {
-      // LÓGICA DE AGRUPAMENTO CORRIGIDA:
-      // O "Dono" do grupo é sempre a Especialidade Preferencial da sala.
-      // Isso garante que se a sala de OFTALMO estiver vazia, ela conta no total de OFTALMO.
-      // Se estiver ocupada por um Clínico, ela conta como OCUPADA no grupo de OFTALMO (invasão),
-      // ou podemos agrupar por quem está usando.
-      
-      // Para consistência de "Capacidade vs Uso", o ideal é agrupar pelo DONO DA SALA.
-      // Assim, a barra de progresso mostra: "Das salas de Oftalmo, quantas estão em uso?"
-      const chaveGrupo = normalize(sala.especialidade_preferencial);
-      
-      if (!agrupamento.has(chaveGrupo)) {
-        agrupamento.set(chaveGrupo, {
-          ambulatorio: chaveGrupo,
-          total_salas: 0,
-          salas_ocupadas: 0,
-          localizacao: [],
-          lista_salas_detalhada: []
-        })
-      }
-
-      const grupo = agrupamento.get(chaveGrupo)!
-      
-      // Contabiliza Capacidade (apenas se não estiver em manutenção)
-      if (!sala.is_maintenance) {
-          grupo.total_salas++;
-          if (sala.status_atual === 'OCUPADA') {
-              grupo.salas_ocupadas++;
-          }
-      }
-
-      // Formata Local
-      const loc = `Bloco ${sala.bloco} - ${sala.andar === '0' ? 'Térreo' : sala.andar + 'º'}`
-      if (!grupo.localizacao.includes(loc)) grupo.localizacao.push(loc)
-
-      grupo.lista_salas_detalhada.push({
-        id: sala.id,
-        numero: sala.nome_visual,
-        status: sala.is_maintenance ? 'MANUTENCAO' : sala.status_atual,
-        ocupante: sala.ocupante_atual,
-        horario: sala.horario_entrada,
-        andar: sala.andar,
-        bloco: sala.bloco
-      })
-    })
-
-    // Filtra grupos vazios (obras ou erros) e ordena por quem tem mais gente trabalhando
-    dashboardData.value = Array.from(agrupamento.values())
-        .filter(g => g.total_salas > 0)
-        .sort((a, b) => b.salas_ocupadas - a.salas_ocupadas)
-    
-    lastUpdate.value = new Date().toLocaleTimeString()
+    const res = await fetch('http://localhost:8000/api/dashboard/agora')
+    if (res.ok) {
+      dadosTempoReal.value = await res.json()
+    }
   } catch (e) {
-    console.error(e)
+    console.error("Erro ao buscar dados tempo real", e)
+  } finally {
+    loading.value = false
   }
 }
 
-const openDetails = (item: ResumoAmbulatorio) => {
-  selectedAllocation.value = item
-  isDetailsModalOpen.value = true
-}
+// Agrupa as salas planas em cards por Especialidade/Ambulatório (Layout Antigo)
+const ambulatoriosAgrupados = computed(() => {
+  if (!dadosTempoReal.value) return []
+  
+  const grupos: Record<string, any> = {}
+  
+  dadosTempoReal.value.salas.forEach((sala: any) => {
+    // Se estiver ocupada, usa a especialidade do ocupante
+    // Se estiver livre, tenta usar a especialidade preferencial (se tivéssemos esse dado no flat list)
+    // Como o endpoint realtime é focado em status, vamos agrupar por Bloco/Andar para salas livres ou manter "Geral"
+    
+    // Melhor abordagem: Agrupar pelo ocupante se houver, ou "Salas Livres/Manutenção" se não
+    let chave = "Disponíveis / Outros"
+    if (sala.status === 'OCUPADA' && sala.ocupante) {
+      chave = sala.ocupante.especialidade || "Alocação Geral"
+    } else if (sala.status === 'MANUTENCAO') {
+      chave = "Manutenção"
+    } else {
+        // Salas livres: Tenta inferir pelo nome ou joga em Disponíveis
+        chave = "Salas Disponíveis"
+    }
 
-const closeDetails = () => {
-  isDetailsModalOpen.value = false
-  setTimeout(() => selectedAllocation.value = null, 200)
-}
+    if (!grupos[chave]) {
+      grupos[chave] = { nome: chave, salas: [], total: 0, ocupadas: 0 }
+    }
+    
+    grupos[chave].salas.push(sala)
+    grupos[chave].total++
+    if (sala.status === 'OCUPADA') grupos[chave].ocupadas++
+  })
 
-const formatLocation = (locs: string[]) => {
-  if (locs.length <= 2) return locs
-  return [...locs.slice(0, 2), `+${locs.length - 2}`]
-}
-
-// Função helper para evitar NaN na template
-const getPercent = (ocupadas: number, total: number) => {
-    if (total === 0) return 0;
-    return Math.round((ocupadas / total) * 100);
-}
+  // Ordena alfabeticamente, deixando Disponíveis no topo
+  return Object.values(grupos).sort((a: any, b: any) => {
+      if(a.nome === 'Salas Disponíveis') return -1
+      return a.nome.localeCompare(b.nome)
+  })
+})
 
 onMounted(() => {
   fetchDashboardRealTime()
-  pollingInterval = setInterval(fetchDashboardRealTime, 5000)
+  intervalo = setInterval(fetchDashboardRealTime, 30000) // Atualiza a cada 30s
 })
 
 onUnmounted(() => {
-  if (pollingInterval) clearInterval(pollingInterval)
+  if (intervalo) clearInterval(intervalo)
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans text-gray-900 pb-20">
-    <header class="bg-indigo-600 text-white p-6 shadow-md rounded-b-3xl mb-8">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold">Monitoramento de Ocupação</h1>
-          <p class="text-indigo-100 text-sm">Visão em tempo real agrupada por equipe ativa</p>
-        </div>
-        <div class="bg-indigo-700/50 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium border border-indigo-500/30">
-          <span class="text-indigo-50">Última atualização: {{ lastUpdate }}</span>
-        </div>
+  <div class="p-6 bg-gray-50 min-h-screen">
+    
+    <!-- Cabeçalho (Mantido o novo com stats) -->
+    <div class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+          Monitoramento em Tempo Real
+        </h2>
+        <p v-if="dadosTempoReal" class="text-sm text-gray-500 mt-1">
+          Visão exata de: <strong class="text-blue-700">{{ dadosTempoReal.tempo.dia }} - {{ dadosTempoReal.tempo.turno }}</strong> ({{ dadosTempoReal.tempo.hora_legivel }})
+        </p>
       </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4">
-      <div v-if="dashboardData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        <div 
-          v-for="item in dashboardData" 
-          :key="item.ambulatorio"
-          @click="openDetails(item)"
-          class="group bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition cursor-pointer relative overflow-hidden"
-        >
-          <div class="absolute left-0 top-0 bottom-0 w-1 transition-colors" 
-               :class="item.salas_ocupadas > 0 ? 'bg-indigo-500' : 'bg-gray-300'"></div>
-
-          <div class="pl-3 flex flex-col h-full">
-            <div class="flex justify-between items-start mb-3">
-              <div class="pr-2 overflow-hidden">
-                <h4 class="font-bold text-gray-900 truncate" :title="item.ambulatorio">{{ item.ambulatorio }}</h4>
-                <p class="text-[10px] text-gray-500 mt-1 truncate">
-                   {{ formatLocation(item.localizacao).join(', ') }}
-                </p>
-              </div>
-              <div class="text-right shrink-0">
-                 <div class="text-2xl font-bold text-gray-800 leading-none">{{ item.salas_ocupadas }}</div>
-                 <div class="text-[10px] text-gray-400 font-medium uppercase">Ativos</div>
-              </div>
-            </div>
-
-            <div class="mt-auto pt-2">
-              <div class="flex justify-between text-[10px] font-bold uppercase text-gray-400 mb-1">
-                  <span>Ocupação</span>
-                  <span>{{ getPercent(item.salas_ocupadas, item.total_salas) }}%</span>
-              </div>
-              <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                      class="h-1.5 rounded-full transition-all duration-500"
-                      :class="getPercent(item.salas_ocupadas, item.total_salas) > 85 ? 'bg-red-500' : 'bg-indigo-500'"
-                      :style="{ width: `${getPercent(item.salas_ocupadas, item.total_salas)}%` }"
-                  ></div>
-              </div>
-              <!-- Adicionado para clareza -->
-              <div class="text-[10px] text-gray-400 mt-1 text-right">
-                {{ item.total_salas }} salas totais
-              </div>
-            </div>
+      
+      <div v-if="dadosTempoReal" class="flex gap-4">
+        <div class="flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-lg border border-blue-100">
+          <div>
+            <p class="text-xs text-blue-600 font-bold uppercase">Livres</p>
+            <p class="text-center text-xl font-bold text-blue-900">{{ dadosTempoReal.estatisticas.livres }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 px-2 py-2 bg-green-50 rounded-lg border border-green-100">
+          <div>
+            <p class="text-xs text-green-600 font-bold uppercase">Ocupadas</p>
+            <p class="text-center text-xl font-bold text-green-900">{{ dadosTempoReal.estatisticas.ocupadas }}</p>
           </div>
         </div>
       </div>
-      
-      <div v-else class="text-center py-20 text-gray-500">
-        <span class="loading loading-spinner loading-lg text-indigo-500"></span>
-        <p class="mt-2 text-sm">Carregando dados do hospital...</p>
-      </div>
-    </main>
+    </div>
 
-    <AllocationDetailsModal 
-      :is-open="isDetailsModalOpen"
-      :data="selectedAllocation"
-      @close="closeDetails"
-    />
+    <div v-if="loading" class="text-center py-20 text-gray-400">
+      <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+      Carregando mapa do hospital...
+    </div>
+
+    <!-- Grid de Cards (Estilo Antigo) -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      
+      <div 
+        v-for="grupo in ambulatoriosAgrupados" 
+        :key="grupo.nome"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+      >
+        <!-- Header do Card -->
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+          <h3 class="font-bold text-gray-800 text-sm uppercase truncate pr-2" :title="grupo.nome">
+            {{ grupo.nome }}
+          </h3>
+          <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-600">
+            {{ grupo.salas.length }} Salas
+          </span>
+        </div>
+
+        <!-- Lista de Salas -->
+        <div class="p-3 flex-1 overflow-y-auto max-h-48 custom-scrollbar">
+          <ul class="space-y-2">
+            <li 
+              v-for="sala in grupo.salas" 
+              :key="sala.sala_id" 
+              class="flex justify-between items-center text-xs p-2 rounded bg-gray-50"
+              :class="{'bg-red-50 text-red-700': sala.status === 'OCUPADA', 'bg-green-50 text-green-700': sala.status === 'LIVRE'}"
+            >
+              <div class="flex items-center gap-2">
+                <span 
+                  class="w-2 h-2 rounded-full"
+                  :class="sala.status === 'LIVRE' ? 'bg-green-500' : (sala.status === 'OCUPADA' ? 'bg-red-500' : 'bg-yellow-500')"
+                ></span>
+                <span class="font-bold">{{ sala.nome }}</span>
+              </div>
+              
+              <div v-if="sala.status === 'OCUPADA'" class="text-right truncate max-w-[100px]">
+                <span class="block font-medium truncate">{{ sala.ocupante.medico }}</span>
+              </div>
+              <div v-else>
+                <span class="opacity-60">{{ sala.status }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
