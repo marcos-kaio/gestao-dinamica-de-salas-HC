@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
 
-// 1. Atualizar a Interface para casar com o Dashboard
 interface SalaStatus {
   id: string;
   numero: string;
-  status: 'LIVRE' | 'OCUPADA' | 'MANUTENCAO'; // Adicionado MANUTENCAO
+  status: 'LIVRE' | 'OCUPADA' | 'MANUTENCAO';
   ocupante: string | null;
   horario: string | null;
   andar: string;
   bloco: string;
-  especialidade_original?: string; // Opcional, para evitar erros se não vier
+  especialidade_original?: string;
 }
 
 interface ResumoAmbulatorio {

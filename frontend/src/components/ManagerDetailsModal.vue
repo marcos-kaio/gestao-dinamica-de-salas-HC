@@ -1,119 +1,131 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+import { ref } from 'vue'
 
-// Interface dos dados que vêm do Dashboard
-interface ResumoAmbulatorio {
-  ambulatorio: string;
-  total_salas: number;
-  localizacao: string[];
-  lista_salas: string[];
-}
-
-defineProps<{
-  isOpen: boolean;
-  data: ResumoAmbulatorio | null;
+const props = defineProps<{
+  data: any,
+  isOpen: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'close'): void
-}>()
+const emit = defineEmits(['close', 'updated'])
 
-// Função de formatação de localização 
-const formatLocation = (loc: string) => {
-  const match = loc.match(/Bloco\s+(.+)\s+-\s+(\d+)/)
-  if (match) {
-    const bloco = match[1]
-    const andar = match[2]
-    const andarFormatado = andar === '0' ? 'Térreo' : `${andar}º Andar`
-    return `Bloco ${bloco} - ${andarFormatado}`
+const editandoId = ref<number | null>(null)
+const salasDisponiveis = ref<any[]>([])
+const loadingSalas = ref(false)
+
+const iniciarEdicao = async (alocacaoId: number) => {
+  editandoId.value = alocacaoId
+  loadingSalas.value = true
+  salasDisponiveis.value = []
+  
+  try {
+    const res = await fetch(`http://localhost:8000/api/alocacao/${alocacaoId}/opcoes`)
+    if(res.ok) {
+      salasDisponiveis.value = await res.json()
+    }
+  } finally {
+    loadingSalas.value = false
   }
-  return loc
 }
 
-const handleClose = () => {
-  emit('close')
+const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
+  try {
+    const res = await fetch(`http://localhost:8000/api/alocacao/${alocacaoId}/trocar`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ nova_sala_id: novaSalaId })
+    })
+    
+    if(res.ok) {
+      editandoId.value = null
+      emit('updated')
+    }
+  } catch (e) {
+    alert("Erro ao salvar troca")
+  }
 }
 </script>
 
 <template>
-  <div v-if="isOpen && data" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity p-4">
-    
-    <div class="w-full max-w-2xl rounded-xl bg-white shadow-2xl overflow-hidden animate-scale-in">
+  <div v-if="isOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
       
-      <div class="p-6 border-b border-gray-100">
-        <div class="flex items-center justify-between mb-6">
-          <div class="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-bold text-blue-600">
-            {{ data.ambulatorio }}
-          </div>
-          
-          <div class="text-2xl font-bold text-gray-900">
-            <!-- CORREÇÃO AQUI: Adicionado ?? 0 para garantir exibição -->
-            {{ data.total_salas ?? 0 }} <span class="text-sm font-normal text-gray-500">salas</span>
-          </div>
-        </div>
-
+      <!-- Header -->
+      <div class="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
         <div>
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">LOCALIZAÇÃO</p>
-          <ul class="text-sm text-gray-600 space-y-2">
-            <li v-for="loc in data.localizacao" :key="loc" class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span class="font-medium">{{ formatLocation(loc) }}</span>
-            </li>
-          </ul>
+          <h2 class="text-2xl font-bold text-gray-800">{{ data?.ambulatorio || 'Detalhes' }}</h2>
+          <p class="text-sm text-gray-600">
+            {{ data?.detalhes?.length || 0 }} alocações registradas
+          </p>
         </div>
+        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
       </div>
 
-      <div class="flex justify-center -mt-3">
-        <div class="bg-white p-1 rounded-full border border-gray-100 shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
+      <!-- Body -->
+      <div class="p-6 overflow-y-auto flex-1">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-xs font-bold text-gray-500 uppercase border-b">
+              <th class="pb-3 w-1/4">Dia/Turno</th>
+              <th class="pb-3 w-1/3">Profissional</th>
+              <th class="pb-3 w-1/4">Sala</th>
+              <th class="pb-3 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <tr v-for="item in data?.detalhes" :key="item.alocacao_id" class="border-b hover:bg-gray-50 group">
+              <td class="py-3 font-medium text-gray-700">
+                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs border border-blue-100">
+                  {{ item.dia }} - {{ item.turno }}
+                </span>
+              </td>
+              <td class="py-3 text-gray-800 font-medium truncate max-w-[200px]" :title="item.medico">
+                {{ item.medico }}
+              </td>
+              
+              <td class="py-3">
+                <div v-if="editandoId === item.alocacao_id" class="relative">
+                  <select 
+                    class="border rounded px-2 py-1 w-full text-xs bg-white focus:ring-2 focus:ring-blue-500"
+                    @change="salvarTroca(item.alocacao_id, ($event.target as HTMLSelectElement).value)"
+                  >
+                    <option disabled selected>Selecione...</option>
+                    <option v-for="opt in salasDisponiveis" :key="opt.sala_id" :value="opt.sala_id">
+                      {{ opt.nome }} {{ opt.recomendado ? '⭐' : '' }}
+                    </option>
+                  </select>
+                  <div v-if="loadingSalas" class="text-[10px] text-gray-400 mt-1">Carregando salas...</div>
+                </div>
+                <div v-else class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                  {{ item.sala }}
+                </div>
+              </td>
 
-      <div class="p-6 bg-gray-50/50">
-        <p class="text-sm font-semibold text-gray-600 mb-4">Salas Alocadas:</p>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          <div 
-            v-for="sala in data.lista_salas" 
-            :key="sala"
-            class="flex items-center justify-center rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm hover:border-blue-300 transition-colors cursor-default"
-          >
-            {{ sala }}
-          </div>
-        </div>
+              <td class="py-3 text-right">
+                <button 
+                  v-if="editandoId !== item.alocacao_id"
+                  @click="iniciarEdicao(item.alocacao_id)"
+                  class="text-blue-600 hover:text-blue-800 font-medium text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition"
+                >
+                  Trocar
+                </button>
+                <button 
+                  v-else 
+                  @click="editandoId = null"
+                  class="text-gray-500 hover:text-gray-700 text-xs underline ml-2"
+                >
+                  Cancelar
+                </button>
+              </td>
+            </tr>
+            <tr v-if="!data?.detalhes || data.detalhes.length === 0">
+              <td colspan="4" class="text-center py-8 text-gray-500">
+                Nenhuma alocação encontrada para este ambulatório.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
-        <button 
-          @click="handleClose"
-          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition"
-        >
-          Fechar
-        </button>
-      </div>
-
     </div>
   </div>
 </template>
-
-<style scoped>
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-</style>

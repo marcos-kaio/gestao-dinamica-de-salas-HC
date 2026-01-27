@@ -1,10 +1,7 @@
 fastapi
-uvicorn[standard]
+uvicorn
+sqlalchemy
 pydantic
 pandas
-pydantic-settings
-sqlalchemy
 python-multipart
-
-# Drivers de banco de dados (SQLite vem embutido, Postgres opcional)
-psycopg2-binary
+pytz
