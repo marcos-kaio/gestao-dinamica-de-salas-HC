@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 
-// defineProps and defineEmits are compiler macros and should not be imported
-// Only isOpen is required here. If 'data' was present, it was a mistake.
 const props = defineProps<{
   isOpen: boolean
 }>()
 
 const emit = defineEmits(['close', 'success'])
 
-const activeTab = ref<'csv' | 'manual'>('csv')
+const activeTab = ref<'csv' | 'manual' | 'salas'>('csv')
 
+// --- CSV ---
 const isDragging = ref(false)
 const file = ref<File | null>(null)
 const uploadStatus = ref('')
 const isLoading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
+// --- Manual ---
 const novaDemanda = ref({
   medico_nome: '',
   especialidade: '',
@@ -31,26 +31,165 @@ const especialidades = [
   "CIRURGIA GERAL", "ONCOLOGIA", "NEFROLOGIA", "UROLOGIA"
 ]
 
+// --- Salas ---
+const salas = ref<any[]>([])
+const filtroTexto = ref('')
+const loadingSalas = ref(false)
+
+// Estado para Ação em Lote
+const loteBloco = ref('')
+const loteAndar = ref('')
+
+const carregarSalas = async () => {
+  loadingSalas.value = true
+  try {
+    const res = await fetch('http://localhost:8000/api/salas')
+    if (res.ok) {
+      salas.value = await res.json()
+    }
+  } finally {
+    loadingSalas.value = false
+  }
+}
+
+// Extrai Blocos Únicos
+const blocosDisponiveis = computed(() => {
+  const blocos = new Set(salas.value.map(s => s.bloco))
+  return Array.from(blocos).sort()
+})
+
+// Extrai Andares
+const andaresDisponiveis = computed(() => {
+  if (!loteBloco.value) return []
+  
+  // Filtra salas do bloco selecionado
+  const salasDoBloco = salas.value.filter(s => s.bloco === loteBloco.value)
+  const andares = new Set(salasDoBloco.map(s => s.andar))
+  
+  // Ordena numéricamente se possível
+  return Array.from(andares).sort((a, b) => {
+      if (a === '0') return -1
+      if (b === '0') return 1
+      return String(a).localeCompare(String(b), undefined, { numeric: true })
+  })
+})
+
+const formatAndar = (andar: string) => {
+    if (andar === '0') return 'Térreo'
+    return `${andar}º Andar`
+}
+
+// Limpa o andar se o bloco mudar
+watch(loteBloco, () => {
+  loteAndar.value = ''
+})
+
+const aplicarLote = async (statusManutencao: boolean) => {
+  if (!loteBloco.value || !loteAndar.value) {
+    alert("Selecione um Bloco e um Andar.")
+    return
+  }
+  
+  const acao = statusManutencao ? "BLOQUEAR" : "LIBERAR"
+  const setor = `Bloco ${loteBloco.value} - ${formatAndar(loteAndar.value)}`
+  
+  if(!confirm(`Tem certeza que deseja ${acao} todas as salas do ${setor}?`)) return
+
+  isLoading.value = true
+  try {
+    const res = await fetch('http://localhost:8000/api/salas/lote/update', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bloco: loteBloco.value,
+        andar: loteAndar.value,
+        is_maintenance: statusManutencao
+      })
+    })
+    
+    if (res.ok) {
+      const data = await res.json()
+      alert(`Sucesso! ${data.afetados} salas foram atualizadas.`)
+      carregarSalas() 
+    } else {
+      alert("Erro ao atualizar lote.")
+    }
+  } catch (e) {
+    alert("Erro de conexão.")
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const toggleManutencao = async (sala: any) => {
+  const novoStatus = !sala.is_maintenance
+  sala.is_maintenance = novoStatus
+  
+  try {
+    const res = await fetch(`http://localhost:8000/api/salas/${sala.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_maintenance: novoStatus })
+    })
+    
+    if (!res.ok) {
+      sala.is_maintenance = !novoStatus
+      alert('Erro ao atualizar status.')
+    }
+  } catch (e) {
+    sala.is_maintenance = !novoStatus
+    alert('Erro de conexão.')
+  }
+}
+
+// Filtro Unificado da Tabela
+const salasFiltradas = computed(() => {
+  let lista = salas.value
+
+  // Filtra por Bloco
+  if (loteBloco.value) {
+    lista = lista.filter(s => s.bloco === loteBloco.value)
+  }
+
+  // Filtra por Andar
+  if (loteAndar.value) {
+    lista = lista.filter(s => s.andar === loteAndar.value)
+  }
+
+  // Filtra por Texto Livre
+  if (filtroTexto.value) {
+    const f = filtroTexto.value.toLowerCase()
+    lista = lista.filter(s => 
+      s.nome_visual.toLowerCase().includes(f) || 
+      (s.especialidade_preferencial || '').toLowerCase().includes(f)
+    )
+  }
+
+  return lista
+})
+
+watch(activeTab, (newTab) => {
+  if (newTab === 'salas' && salas.value.length === 0) {
+    carregarSalas()
+  }
+})
+
+// Lógica Geral
+
 const triggerFileInput = () => fileInput.value?.click()
 
 const handleFileSelect = (e: Event) => {
   const target = e.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
+  if (target.files?.length) {
     const selectedFile = target.files[0]
-    if (selectedFile) {
-      validarArquivo(selectedFile)
-    }
+    if (selectedFile) validarArquivo(selectedFile)
   }
 }
 
 const handleDrop = (e: DragEvent) => {
   isDragging.value = false
-  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-    const droppedFile = e.dataTransfer.files[0]
-    if (droppedFile) {
-      validarArquivo(droppedFile)
-    }
-  }
+  const droppedFile = e.dataTransfer?.files?.[0]
+  if (droppedFile) validarArquivo(droppedFile)
 }
 
 const validarArquivo = (arquivo: File) => {
@@ -120,10 +259,13 @@ const salvarManual = async () => {
 }
 
 const sincronizarSalas = async () => {
+  if(!confirm("Isso apagará todas as configurações das salas e retornará para a configuração original. Tem certeza?")) return
+  
   isLoading.value = true
   try {
     await fetch('http://localhost:8000/api/setup/importar-salas', { method: 'POST' })
-    alert('Estrutura de salas sincronizada com o padrão do sistema.')
+    alert('Salas resetadas para o padrão original.')
+    carregarSalas()
     emit('success')
   } catch (e) {
     alert('Erro ao sincronizar salas.')
@@ -135,8 +277,9 @@ const sincronizarSalas = async () => {
 
 <template>
   <div v-if="isOpen" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="bg-white rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       
+      <!-- Header -->
       <div class="bg-blue-800 p-4 flex justify-between items-center text-white">
         <h2 class="font-bold text-lg flex items-center gap-2">
           ⚙️ Gerenciamento de Dados
@@ -144,25 +287,35 @@ const sincronizarSalas = async () => {
         <button @click="$emit('close')" class="hover:bg-blue-700 p-1 rounded transition">&times;</button>
       </div>
 
-      <div class="flex border-b border-gray-200">
+      <!-- Tabs -->
+      <div class="flex border-b border-gray-200 bg-gray-50">
         <button 
           @click="activeTab = 'csv'" 
-          class="flex-1 py-3 text-sm font-medium transition-colors"
-          :class="activeTab === 'csv' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' : 'text-gray-500 hover:text-gray-700'"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          :class="activeTab === 'csv' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
-          📂 Importar Grades (CSV)
+          Importar Grades
         </button>
         <button 
           @click="activeTab = 'manual'" 
-          class="flex-1 py-3 text-sm font-medium transition-colors"
-          :class="activeTab === 'manual' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' : 'text-gray-500 hover:text-gray-700'"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          :class="activeTab === 'manual' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
-          ✍️ Inserção Manual
+          Inserção Manual
+        </button>
+        <button 
+          @click="activeTab = 'salas'" 
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          :class="activeTab === 'salas' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
+        >
+          Salas e Setores
         </button>
       </div>
 
-      <div class="p-6 overflow-y-auto">
+      <!-- Content -->
+      <div class="p-6 overflow-y-auto bg-white flex-1">
         
+        <!-- Tab CSV -->
         <div v-if="activeTab === 'csv'" class="space-y-4">
           <div 
             class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors"
@@ -192,31 +345,20 @@ const sincronizarSalas = async () => {
               {{ isLoading ? 'Processando...' : 'Importar Grades' }}
             </button>
           </div>
-
-          <div class="mt-6 bg-gray-50 p-3 rounded border border-gray-200 flex justify-between items-center">
-            <div>
-              <p class="text-sm font-bold text-gray-700">Estrutura de Salas</p>
-              <p class="text-xs text-gray-500">Sincroniza com o cadastro padrão do sistema.</p>
-            </div>
-            <button @click="sincronizarSalas" :disabled="isLoading" class="text-xs border border-gray-300 px-3 py-1 rounded hover:bg-gray-100 text-gray-600">
-              🔄 Ressincronizar Salas
-            </button>
-          </div>
         </div>
 
+        <!-- Tab Manual -->
         <div v-if="activeTab === 'manual'" class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Profissional</label>
             <input v-model="novaDemanda.medico_nome" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nome do médico">
           </div>
-          
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Especialidade</label>
             <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded bg-white">
               <option v-for="esp in especialidades" :key="esp" :value="esp">{{ esp }}</option>
             </select>
           </div>
-
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dia</label>
@@ -237,10 +379,117 @@ const sincronizarSalas = async () => {
               </select>
             </div>
           </div>
-
           <div class="mt-4 pt-4 border-t flex justify-end gap-2">
             <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
             <button @click="salvarManual" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 shadow transition">Salvar Demanda</button>
+          </div>
+        </div>
+
+        <!-- Tab SALAS -->
+        <div v-if="activeTab === 'salas'" class="flex flex-col h-full">
+          
+          <!-- Área de Ações em Lote -->
+          <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+            <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-1">
+              Filtros por setor
+            </h3>
+            <div class="flex flex-wrap gap-3 items-end">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Bloco</label>
+                <select v-model="loteBloco" class="border rounded p-1.5 text-sm w-32 bg-white cursor-pointer hover:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none">
+                  <option value="" selected>Todos</option>
+                  <option v-for="b in blocosDisponiveis" :key="b" :value="b">{{ b }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Andar</label>
+                <select 
+                  v-model="loteAndar" 
+                  class="border rounded p-1.5 text-sm w-32 bg-white cursor-pointer hover:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+                  :disabled="!loteBloco"
+                >
+                  <option value="" selected>Todos</option>
+                  <option v-for="a in andaresDisponiveis" :key="a" :value="a">{{ formatAndar(a) }}</option>
+                </select>
+              </div>
+              
+              <div class="flex gap-2 ml-auto pl-4 border-l border-blue-200">
+                <button 
+                  @click="aplicarLote(true)" 
+                  class="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded hover:bg-red-200 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  :disabled="!loteBloco || !loteAndar || isLoading"
+                  title="Bloqueia todas as salas listadas abaixo"
+                >
+                  🔒 Bloquear Setor
+                </button>
+                <button 
+                  @click="aplicarLote(false)" 
+                  class="bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded hover:bg-green-200 border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  :disabled="!loteBloco || !loteAndar || isLoading"
+                  title="Libera todas as salas listadas abaixo"
+                >
+                  ✅ Liberar Setor
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Busca -->
+          <div class="flex justify-between items-center mb-4">
+            <input 
+              v-model="filtroTexto" 
+              type="text" 
+              placeholder="🔍 Buscar sala por nome ou especialidade..." 
+              class="border p-2 rounded w-80 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+            >
+            <button @click="sincronizarSalas" class="text-xs text-red-600 hover:text-red-800 underline">
+              ⚠ Resetar para padrão
+            </button>
+          </div>
+
+          <div v-if="loadingSalas" class="text-center py-10 text-gray-400">Carregando...</div>
+
+          <!-- Tabela -->
+          <div v-else class="flex-1 overflow-y-auto border rounded border-gray-200">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-100 text-gray-600 uppercase text-xs sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th class="p-3">Sala</th>
+                  <th class="p-3">Bloco/Andar</th>
+                  <th class="p-3">Especialidade</th>
+                  <th class="p-3 text-center">Manutenção</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="sala in salasFiltradas" :key="sala.id" class="hover:bg-gray-50 transition-colors">
+                  <td class="p-3 font-medium text-gray-800">{{ sala.nome_visual }}</td>
+                  <td class="p-3 text-gray-500">{{ sala.bloco }} - {{ formatAndar(sala.andar) }}</td>
+                  <td class="p-3 text-gray-500 text-xs truncate max-w-[150px]">{{ sala.especialidade_preferencial || '-' }}</td>
+                  <td class="p-3 text-center">
+                    <button 
+                      @click="toggleManutencao(sala)"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                      :class="sala.is_maintenance ? 'bg-red-500' : 'bg-gray-200'"
+                      :title="sala.is_maintenance ? 'Clique para liberar' : 'Clique para bloquear'"
+                    >
+                      <span 
+                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm"
+                        :class="sala.is_maintenance ? 'translate-x-6' : 'translate-x-1'"
+                      />
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="salasFiltradas.length === 0">
+                  <td colspan="4" class="p-8 text-center text-gray-400 italic">
+                    Nenhuma sala encontrada com os filtros atuais.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 p-3 bg-blue-50 rounded text-xs text-blue-700 border border-blue-100">
+            💡 <strong>Nota:</strong> As alterações são salvas imediatamente. Se você desbloquear salas, clique em <strong>"Recalcular Alocação"</strong> no painel principal para utilizá-las.
           </div>
         </div>
 
@@ -248,3 +497,8 @@ const sincronizarSalas = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.animate-fade-in { animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
