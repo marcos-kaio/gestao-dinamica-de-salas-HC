@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import shutil
 import os
+from datetime import datetime
+import pytz
 
 from app.database import engine, Base, get_db
 from app.models import Sala, Grade, Alocacao, Especialidade
@@ -13,8 +15,9 @@ from app.core.optimizer import (
     obter_resumo_atual, 
     listar_opcoes_troca, 
     aplicar_troca_manual,
-    obter_dashboard_tempo_real # IMPORTANTE
+    obter_dashboard_tempo_real
 )
+from app.core.time import get_horario_atual
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Modelos ---
 class NovaDemanda(BaseModel):
     medico_nome: str
     especialidade: str
@@ -39,6 +43,19 @@ class NovaDemanda(BaseModel):
 
 class TrocaSalaRequest(BaseModel):
     nova_sala_id: str
+
+class SalaUpdate(BaseModel):
+    is_maintenance: bool
+
+class LoteSalasUpdate(BaseModel):
+    bloco: str
+    andar: str
+    is_maintenance: bool
+
+class CheckInRequest(BaseModel):
+    medico_nome: str
+    especialidade: str
+    sala_id: str
 
 @app.get("/")
 def read_root():
@@ -75,11 +92,29 @@ def trigger_alocacao_inteligente(db: Session = Depends(get_db)):
 def ler_alocacao_atual(db: Session = Depends(get_db)):
     return obter_resumo_atual(db)
 
-# --- Monitoramento Tempo Real ---
 @app.get("/api/dashboard/agora")
 def ler_dashboard_tempo_real(db: Session = Depends(get_db)):
-    """Retorna o status das salas neste exato momento."""
     return obter_dashboard_tempo_real(db)
+
+# --- Salas ---
+@app.get("/api/salas")
+def listar_salas(db: Session = Depends(get_db)): return db.query(Sala).all()
+
+@app.put("/api/salas/{sala_id}")
+def atualizar_status_sala(sala_id: str, dados: SalaUpdate, db: Session = Depends(get_db)):
+    sala = db.query(Sala).filter(Sala.id == sala_id).first()
+    if not sala: raise HTTPException(404, "Sala não encontrada")
+    sala.is_maintenance = dados.is_maintenance
+    db.commit()
+    return {"message": "Status atualizado"}
+
+@app.put("/api/salas/lote/update")
+def atualizar_salas_lote(dados: LoteSalasUpdate, db: Session = Depends(get_db)):
+    salas = db.query(Sala).filter(Sala.bloco == dados.bloco, Sala.andar == dados.andar).all()
+    if not salas: raise HTTPException(404, "Nenhuma sala encontrada")
+    for s in salas: s.is_maintenance = dados.is_maintenance
+    db.commit()
+    return {"message": "Setor atualizado", "afetados": len(salas)}
 
 # --- Gestão Manual ---
 @app.get("/api/alocacao/{alocacao_id}/opcoes")
@@ -88,15 +123,89 @@ def obter_opcoes_troca(alocacao_id: int, db: Session = Depends(get_db)):
 
 @app.put("/api/alocacao/{alocacao_id}/trocar")
 def realizar_troca_manual(alocacao_id: int, req: TrocaSalaRequest, db: Session = Depends(get_db)):
-    if aplicar_troca_manual(alocacao_id, req.nova_sala_id, db):
-        return {"message": "Sucesso"}
+    if aplicar_troca_manual(alocacao_id, req.nova_sala_id, db): return {"message": "Sucesso"}
     raise HTTPException(400, "Erro na troca")
 
 @app.post("/api/grade/adicionar")
 def adicionar_demanda_manual(demanda: NovaDemanda, db: Session = Depends(get_db)):
-    db.add(Grade(nome_profissional=demanda.medico_nome, especialidade=demanda.especialidade, dia_semana=demanda.dia_semana, turno=demanda.turno, tipo_recurso=demanda.tipo_recurso, origem="GESTOR"))
+    db.add(Grade(
+        nome_profissional=demanda.medico_nome,
+        especialidade=demanda.especialidade,
+        dia_semana=demanda.dia_semana,
+        turno=demanda.turno,
+        tipo_recurso=demanda.tipo_recurso,
+        origem="GESTOR"
+    ))
     db.commit()
     return {"message": "OK"}
 
-@app.get("/api/salas")
-def listar_salas(db: Session = Depends(get_db)): return db.query(Sala).all()
+# --- CHECK-IN / CHECK-OUT REAL ---
+
+@app.post("/api/checkin")
+def realizar_checkin(dados: CheckInRequest, db: Session = Depends(get_db)):
+    tempo = get_horario_atual()
+    dia = tempo['dia']
+    turno = tempo['turno']
+    
+    if not turno:
+        raise HTTPException(400, "Fora do horário de funcionamento")
+
+    # Verifica se já está ocupada AGORA
+    ocupada = db.query(Alocacao).filter(
+        Alocacao.sala_id == dados.sala_id,
+        Alocacao.dia_semana == dia,
+        Alocacao.turno == turno
+    ).first()
+    
+    if ocupada:
+        raise HTTPException(409, "Sala já ocupada neste turno")
+
+    # Cria Grade Temporária para o Check-in
+    nova_grade = Grade(
+        nome_profissional=dados.medico_nome,
+        especialidade=dados.especialidade,
+        dia_semana=dia,
+        turno=turno,
+        tipo_recurso="CHECKIN_APP",
+        origem="PORTAL_MEDICO"
+    )
+    db.add(nova_grade)
+    db.commit()
+    
+    # Cria Alocação Efetiva
+    nova_alocacao = Alocacao(
+        sala_id=dados.sala_id,
+        grade_id=nova_grade.id,
+        dia_semana=dia,
+        turno=turno,
+        score=2000 # Prioridade máxima (ocupação física real)
+    )
+    db.add(nova_alocacao)
+    db.commit()
+    
+    return {"message": "Check-in realizado com sucesso", "alocacao_id": nova_alocacao.id}
+
+@app.post("/api/checkout/{sala_id}")
+def realizar_checkout(sala_id: str, db: Session = Depends(get_db)):
+    tempo = get_horario_atual()
+    dia = tempo['dia']
+    turno = tempo['turno']
+    
+    # Remove alocação ativa neste turno/dia
+    alocacao = db.query(Alocacao).filter(
+        Alocacao.sala_id == sala_id,
+        Alocacao.dia_semana == dia,
+        Alocacao.turno == turno
+    ).first()
+    
+    if not alocacao:
+        # Tenta achar grade criada pelo portal para limpar
+        raise HTTPException(404, "Nenhuma alocação ativa encontrada para liberar agora.")
+        
+    db.delete(alocacao)
+    db.commit()
+    
+    return {"message": "Sala liberada com sucesso"}
+
+@app.get("/api/alocacoes")
+def listar_alocacoes_finais(db: Session = Depends(get_db)): return db.query(Alocacao).all()
