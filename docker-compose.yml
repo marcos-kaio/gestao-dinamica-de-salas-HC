@@ -6,7 +6,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Isso permite que você edite o arquivo no seu PC e atualize no Docker automaticamente
       - ./backend:/app
     environment:
       - TZ=America/Recife
@@ -18,9 +17,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Mapeia seus arquivos locais para dentro do container
       - ./frontend:/app
-      # Evita que o Docker sobrescreva a pasta node_modules do container com a do seu PC (evita bugs)
       - /app/node_modules
     environment:
-      - CHOKIDAR_USEPOLLING=true # Ajuda no hot-reload em alguns sistemas (Windows/Mac)
+      - CHOKIDAR_USEPOLLING=true
