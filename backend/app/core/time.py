@@ -15,12 +15,12 @@ def get_horario_atual():
     # Definição dos Turnos
     if 6 <= hora < 13:
         turno_atual = 'MANHA'
-    elif 13 <= hora < 18: # Ajuste conforme a realidade do HC
+    elif 13 <= hora < 18: # Ajustar conforme a realidade do HC
         turno_atual = 'TARDE'
     elif 18 <= hora < 23:
         turno_atual = 'NOITE'
     else:
-        turno_atual = 'MADRUGADA' # Ou None se não houver atendimento
+        turno_atual = 'MADRUGADA'
         
     return {
         "dia": dia_atual,

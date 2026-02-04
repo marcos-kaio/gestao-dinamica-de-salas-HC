@@ -138,20 +138,19 @@ def importar_salas_csv():
             nome_raw = str(row.get('Nome do ambulatório', ''))
             pav_raw = str(row.get('Pavimento', ''))
             
-            # 1. Filtro de Nome
+            # Filtro de Nome
             nome_clean = normalize_text(nome_raw)
             if not nome_clean or nome_clean == 'NAN' or "TOTAL" in nome_clean: continue
             
-            # 2. VALIDAÇÃO DE PAVIMENTO (CRUCIAL)
+            # VALIDAÇÃO DE PAVIMENTO
             # Se pav_raw for NaN ou vazio, extrair_bloco retorna None
             if not pav_raw or normalize_text(pav_raw) == 'NAN': continue
             
             bloco, andar = extrair_bloco_e_andar(pav_raw)
             
-            # SE NÃO ACHOU BLOCO VÁLIDO, PULA! (Aqui a linha fantasma morre)
             if bloco is None: continue 
 
-            # 3. Filtro de Quantidade
+            # Filtro de Quantidade
             try:
                 qtd = int(float(str(row.get('Número de salas existestes', '0')).replace(',', '.')))
                 if qtd > 60: continue 

@@ -2,12 +2,13 @@ from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 import shutil
 import os
 from datetime import datetime
 import pytz
 
-from app.database import engine, Base, get_db
+from app.database import engine, Base, get_db, SessionLocal
 from app.models import Sala, Grade, Alocacao, Especialidade
 from app.services.importer import importar_salas_csv, importar_grades_csv
 from app.core.optimizer import (
@@ -21,7 +22,25 @@ from app.core.time import get_horario_atual
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="GDS - Gestão Dinâmica de Salas")
+# --- LÓGICA DE AUTO-SEED ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = SessionLocal()
+    try:
+        # Verifica se já existem salas
+        count = db.query(Sala).count()
+        if count == 0:
+            importar_salas_csv() # Popula salas
+            print("--- AUTO-SEED CONCLUÍDO ---")
+    except Exception as e:
+        print(f"Erro no Auto-Seed: {e}")
+    finally:
+        db.close()
+    
+    yield
+    # Executa ao desligar (se necessário)
+
+app = FastAPI(title="GDS - Gestão Dinâmica de Salas", lifespan=lifespan)
 
 origins = ["*"]
 
@@ -178,7 +197,7 @@ def realizar_checkin(dados: CheckInRequest, db: Session = Depends(get_db)):
         grade_id=nova_grade.id,
         dia_semana=dia,
         turno=turno,
-        score=2000 # Prioridade máxima (ocupação física real)
+        score=2000 
     )
     db.add(nova_alocacao)
     db.commit()
