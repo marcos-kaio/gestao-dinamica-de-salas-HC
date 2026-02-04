@@ -215,97 +215,96 @@ const baixarModelo = () => {
 }
 
 const enviarArquivo = async () => {
-  if (!file.value) return
-  isLoading.value = true
-  const formData = new FormData()
-  formData.append('file', file.value)
+  if (!file.value) return;
+  
+  isLoading.value = true;
+  uploadStatus.value = 'Enviando...';
+  
+  const formData = new FormData();
+  formData.append('file', file.value);
   
   try {
-    const res = await fetch('http://localhost:8000/api/upload/grades', { method: 'POST', body: formData })
+    const res = await fetch('http://localhost:8000/api/upload/grades', {
+      method: 'POST',
+      body: formData
+    });
+    
     if (res.ok) {
-      const data = await res.json()
-      alert(`Importação concluída! ${data.detalhes?.grades_importadas} registros.`)
-      file.value = null
-      uploadStatus.value = ''
-      emit('success')
-      emit('close')
+      uploadStatus.value = '✅ Sucesso!';
+      file.value = null;
+      emit('success');
     } else {
-      uploadStatus.value = 'Erro no processamento.'
+      uploadStatus.value = '❌ Erro ao enviar.';
     }
-  } catch (e) {
-    uploadStatus.value = 'Erro de conexão.'
+  } catch (err) {
+    uploadStatus.value = '❌ Erro de conexão.';
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 const salvarManual = async () => {
-  if(!novaDemanda.value.medico_nome || !novaDemanda.value.especialidade) return
-  
   try {
     const res = await fetch('http://localhost:8000/api/grade/adicionar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(novaDemanda.value)
-    })
+    });
     if (res.ok) {
-      alert('Adicionado com sucesso!')
-      emit('success')
-      emit('close')
+      alert('Demanda salva!');
+      emit('close');
     }
-  } catch (e) {
-    alert('Erro ao salvar.')
+  } catch (err) {
+    alert('Erro ao salvar.');
   }
 }
 
 const sincronizarSalas = async () => {
-  if(!confirm("Isso apagará todas as configurações das salas e retornará para a configuração original. Tem certeza?")) return
+  if (!confirm('Resetar todas as salas para o estado padrão?')) return
   
-  isLoading.value = true
   try {
-    await fetch('http://localhost:8000/api/setup/importar-salas', { method: 'POST' })
-    alert('Salas resetadas para o padrão original.')
-    carregarSalas()
-    emit('success')
+    const res = await fetch('http://localhost:8000/api/salas/sincronizar', {
+      method: 'POST'
+    })
+    if (res.ok) {
+      alert('Sincronização concluída!')
+      carregarSalas()
+    }
   } catch (e) {
-    alert('Erro ao sincronizar salas.')
-  } finally {
-    isLoading.value = false
+    alert('Erro ao sincronizar.')
   }
 }
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  <div v-if="isOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm animate-fade-in">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
       
       <!-- Header -->
-      <div class="bg-blue-800 p-4 flex justify-between items-center text-white">
-        <h2 class="font-bold text-lg flex items-center gap-2">
-          ⚙️ Gerenciamento de Dados
-        </h2>
-        <button @click="$emit('close')" class="hover:bg-blue-700 p-1 rounded transition">&times;</button>
+      <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+        <h2 class="text-2xl font-bold text-gray-800">Gerenciar Dados do Sistema</h2>
+        <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer">&times;</button>
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b border-gray-200 bg-gray-50">
+      <div class="flex border-b bg-gray-50">
         <button 
           @click="activeTab = 'csv'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'csv' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Importar Grades
         </button>
         <button 
           @click="activeTab = 'manual'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'manual' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Inserção Manual
         </button>
         <button 
           @click="activeTab = 'salas'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'salas' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Salas e Setores
@@ -336,12 +335,12 @@ const sincronizarSalas = async () => {
           </div>
 
           <div class="flex justify-between items-center text-sm">
-            <button @click="baixarModelo" class="text-blue-600 underline">Baixar Modelo</button>
+            <button @click="baixarModelo" class="text-blue-600 underline cursor-pointer">Baixar Modelo</button>
             <span class="text-gray-400">{{ uploadStatus }}</span>
           </div>
 
           <div class="mt-4 pt-4 border-t flex justify-end">
-            <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition">
+            <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer">
               {{ isLoading ? 'Processando...' : 'Importar Grades' }}
             </button>
           </div>
@@ -355,14 +354,14 @@ const sincronizarSalas = async () => {
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Especialidade</label>
-            <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded bg-white">
+            <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded bg-white cursor-pointer">
               <option v-for="esp in especialidades" :key="esp" :value="esp">{{ esp }}</option>
             </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dia</label>
-              <select v-model="novaDemanda.dia_semana" class="w-full border p-2 rounded bg-white">
+              <select v-model="novaDemanda.dia_semana" class="w-full border p-2 rounded bg-white cursor-pointer">
                 <option value="SEG">Segunda</option>
                 <option value="TER">Terça</option>
                 <option value="QUA">Quarta</option>
@@ -372,7 +371,7 @@ const sincronizarSalas = async () => {
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Turno</label>
-              <select v-model="novaDemanda.turno" class="w-full border p-2 rounded bg-white">
+              <select v-model="novaDemanda.turno" class="w-full border p-2 rounded bg-white cursor-pointer">
                 <option value="MANHA">Manhã</option>
                 <option value="TARDE">Tarde</option>
                 <option value="NOITE">Noite</option>
@@ -380,8 +379,8 @@ const sincronizarSalas = async () => {
             </div>
           </div>
           <div class="mt-4 pt-4 border-t flex justify-end gap-2">
-            <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-            <button @click="salvarManual" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 shadow transition">Salvar Demanda</button>
+            <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded cursor-pointer">Cancelar</button>
+            <button @click="salvarManual" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 shadow transition cursor-pointer">Salvar Demanda</button>
           </div>
         </div>
 
@@ -416,7 +415,7 @@ const sincronizarSalas = async () => {
               <div class="flex gap-2 ml-auto pl-4 border-l border-blue-200">
                 <button 
                   @click="aplicarLote(true)" 
-                  class="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded hover:bg-red-200 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  class="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded hover:bg-red-200 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                   :disabled="!loteBloco || !loteAndar || isLoading"
                   title="Bloqueia todas as salas listadas abaixo"
                 >
@@ -424,7 +423,7 @@ const sincronizarSalas = async () => {
                 </button>
                 <button 
                   @click="aplicarLote(false)" 
-                  class="bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded hover:bg-green-200 border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  class="bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded hover:bg-green-200 border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                   :disabled="!loteBloco || !loteAndar || isLoading"
                   title="Libera todas as salas listadas abaixo"
                 >
@@ -442,7 +441,7 @@ const sincronizarSalas = async () => {
               placeholder="🔍 Buscar sala por nome ou especialidade..." 
               class="border p-2 rounded w-80 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
             >
-            <button @click="sincronizarSalas" class="text-xs text-red-600 hover:text-red-800 underline">
+            <button @click="sincronizarSalas" class="text-xs text-red-600 hover:text-red-800 underline cursor-pointer">
               ⚠ Resetar para padrão
             </button>
           </div>
@@ -468,7 +467,7 @@ const sincronizarSalas = async () => {
                   <td class="p-3 text-center">
                     <button 
                       @click="toggleManutencao(sala)"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
                       :class="sala.is_maintenance ? 'bg-red-500' : 'bg-gray-200'"
                       :title="sala.is_maintenance ? 'Clique para liberar' : 'Clique para bloquear'"
                     >

@@ -147,8 +147,8 @@ const salvarManual = async () => {
         </div>
 
         <div class="mt-4 flex justify-between items-center">
-          <button @click="baixarModelo" class="text-xs text-blue-600 underline">Baixar Modelo</button>
-          <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50">
+          <button @click="baixarModelo" class="text-xs text-blue-600 underline cursor-pointer">Baixar Modelo</button>
+          <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer">
             {{ isLoading ? 'Enviando...' : 'Enviar' }}
           </button>
         </div>
@@ -157,7 +157,7 @@ const salvarManual = async () => {
 
       <!-- Manual -->
       <div class="bg-white p-6 rounded-xl shadow border text-center flex flex-col justify-center">
-        <button @click="isModalOpen = true" class="bg-green-600 text-white py-3 rounded-lg font-bold shadow hover:bg-green-700">
+        <button @click="isModalOpen = true" class="bg-green-600 text-white py-3 rounded-lg font-bold shadow hover:bg-green-700 cursor-pointer">
           + Nova Demanda Manual
         </button>
       </div>
@@ -168,12 +168,12 @@ const salvarManual = async () => {
       <div class="bg-white p-6 rounded-lg w-full max-w-md">
         <h3 class="font-bold text-lg mb-4">Adicionar Demanda</h3>
         <input v-model="novaDemanda.medico_nome" class="w-full border p-2 rounded mb-2" placeholder="Nome">
-        <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded mb-2">
+        <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded mb-2 cursor-pointer">
           <option v-for="esp in especialidades" :key="esp" :value="esp">{{ esp }}</option>
         </select>
         <div class="flex justify-end gap-2 mt-4">
-          <button @click="isModalOpen = false" class="px-4 py-2 text-gray-600">Cancelar</button>
-          <button @click="salvarManual" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
+          <button @click="isModalOpen = false" class="px-4 py-2 text-gray-600 cursor-pointer">Cancelar</button>
+          <button @click="salvarManual" class="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer">Salvar</button>
         </div>
       </div>
     </div>

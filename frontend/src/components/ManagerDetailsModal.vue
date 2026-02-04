@@ -57,7 +57,7 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
             {{ data?.detalhes?.length || 0 }} alocações registradas
           </p>
         </div>
-        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer">&times;</button>
       </div>
 
       <!-- Body -->
@@ -85,7 +85,7 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
               <td class="py-3">
                 <div v-if="editandoId === item.alocacao_id" class="relative">
                   <select 
-                    class="border rounded px-2 py-1 w-full text-xs bg-white focus:ring-2 focus:ring-blue-500"
+                    class="border rounded px-2 py-1 w-full text-xs bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     @change="salvarTroca(item.alocacao_id, ($event.target as HTMLSelectElement).value)"
                   >
                     <option disabled selected>Selecione...</option>
@@ -105,14 +105,14 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
                 <button 
                   v-if="editandoId !== item.alocacao_id"
                   @click="iniciarEdicao(item.alocacao_id)"
-                  class="text-blue-600 hover:text-blue-800 font-medium text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition"
+                  class="text-blue-600 hover:text-blue-800 font-medium text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition cursor-pointer"
                 >
                   Trocar
                 </button>
                 <button 
                   v-else 
                   @click="editandoId = null"
-                  class="text-gray-500 hover:text-gray-700 text-xs underline ml-2"
+                  class="text-gray-500 hover:text-gray-700 text-xs underline ml-2 cursor-pointer"
                 >
                   Cancelar
                 </button>
