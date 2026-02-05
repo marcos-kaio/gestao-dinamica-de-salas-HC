@@ -73,7 +73,7 @@ onMounted(() => { carregarEstadoAtual() })
       <div class="flex gap-3">
         <button 
           @click="modalGestaoAberto = true" 
-          class="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2.5 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition font-medium shadow-sm"
+          class="flex items-center cursor-pointer gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2.5 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition font-medium shadow-sm"
         >
           ⚙️ Gerenciar Dados
         </button>
@@ -81,7 +81,7 @@ onMounted(() => { carregarEstadoAtual() })
         <button 
           @click="gerarAlocacao" 
           :disabled="loading" 
-          class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-md disabled:opacity-70"
+          class="flex items-center cursor-pointer gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-md disabled:opacity-70"
         >
           {{ loading ? 'Calculando...' : '⚡ Recalcular Alocação' }}
         </button>

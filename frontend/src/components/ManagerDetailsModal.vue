@@ -57,7 +57,7 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
             {{ data?.detalhes?.length || 0 }} alocações registradas
           </p>
         </div>
-        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 cursor-pointer text-2xl">&times;</button>
       </div>
 
       <!-- Body -->
@@ -105,14 +105,14 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
                 <button 
                   v-if="editandoId !== item.alocacao_id"
                   @click="iniciarEdicao(item.alocacao_id)"
-                  class="text-blue-600 hover:text-blue-800 font-medium text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition"
+                  class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition"
                 >
                   Trocar
                 </button>
                 <button 
                   v-else 
                   @click="editandoId = null"
-                  class="text-gray-500 hover:text-gray-700 text-xs underline ml-2"
+                  class="text-gray-500 hover:text-gray-700 text-xs underline cursor-pointer ml-2"
                 >
                   Cancelar
                 </button>
