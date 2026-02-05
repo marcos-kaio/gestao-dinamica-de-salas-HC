@@ -20,21 +20,21 @@ const currentView = ref('dashboard') // 'dashboard', 'manager', 'portal'
             <button 
               @click="currentView = 'dashboard'"
               :class="currentView === 'dashboard' ? 'bg-blue-900 text-white shadow-inner' : 'text-blue-100 hover:bg-blue-700 hover:text-white'"
-              class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+              class="px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-all duration-200"
             >
               Visão Geral
             </button>
             <button 
               @click="currentView = 'manager'"
               :class="currentView === 'manager' ? 'bg-blue-900 text-white shadow-inner' : 'text-blue-100 hover:bg-blue-700 hover:text-white'"
-              class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+              class="px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-all duration-200"
             >
-              Gestor
+              Gestão
             </button>
             <button 
               @click="currentView = 'portal'"
               :class="currentView === 'portal' ? 'bg-blue-900 text-white shadow-inner' : 'text-blue-100 hover:bg-blue-700 hover:text-white'"
-              class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+              class="px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-all duration-200"
             >
               Portal Médico
             </button>

@@ -284,28 +284,28 @@ const sincronizarSalas = async () => {
         <h2 class="font-bold text-lg flex items-center gap-2">
           ⚙️ Gerenciamento de Dados
         </h2>
-        <button @click="$emit('close')" class="hover:bg-blue-700 p-1 rounded transition">&times;</button>
+        <button @click="$emit('close')" class="hover:bg-blue-700 p-1 rounded transition cursor-pointer">&times;</button>
       </div>
 
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 bg-gray-50">
         <button 
           @click="activeTab = 'csv'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'csv' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Importar Grades
         </button>
         <button 
           @click="activeTab = 'manual'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'manual' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Inserção Manual
         </button>
         <button 
           @click="activeTab = 'salas'" 
-          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2"
+          class="flex-1 py-3 text-sm font-bold transition-colors border-b-2 cursor-pointer"
           :class="activeTab === 'salas' ? 'text-blue-700 border-blue-600 bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'"
         >
           Salas e Setores
@@ -336,12 +336,12 @@ const sincronizarSalas = async () => {
           </div>
 
           <div class="flex justify-between items-center text-sm">
-            <button @click="baixarModelo" class="text-blue-600 underline">Baixar Modelo</button>
+            <button @click="baixarModelo" class="text-blue-600 underline cursor-pointer">Baixar Modelo</button>
             <span class="text-gray-400">{{ uploadStatus }}</span>
           </div>
 
           <div class="mt-4 pt-4 border-t flex justify-end">
-            <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition">
+            <button @click="enviarArquivo" :disabled="!file || isLoading" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 cursor-pointer cursor disabled:opacity-50 disabled:cursor-not-allowed transition">
               {{ isLoading ? 'Processando...' : 'Importar Grades' }}
             </button>
           </div>
@@ -355,14 +355,14 @@ const sincronizarSalas = async () => {
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Especialidade</label>
-            <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded bg-white">
+            <select v-model="novaDemanda.especialidade" class="w-full border p-2 rounded bg-white cursor-pointer">
               <option v-for="esp in especialidades" :key="esp" :value="esp">{{ esp }}</option>
             </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dia</label>
-              <select v-model="novaDemanda.dia_semana" class="w-full border p-2 rounded bg-white">
+              <select v-model="novaDemanda.dia_semana" class="w-full border p-2 rounded bg-white cursor-pointer">
                 <option value="SEG">Segunda</option>
                 <option value="TER">Terça</option>
                 <option value="QUA">Quarta</option>
@@ -372,7 +372,7 @@ const sincronizarSalas = async () => {
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Turno</label>
-              <select v-model="novaDemanda.turno" class="w-full border p-2 rounded bg-white">
+              <select v-model="novaDemanda.turno" class="w-full border p-2 rounded bg-white cursor-pointer">
                 <option value="MANHA">Manhã</option>
                 <option value="TARDE">Tarde</option>
                 <option value="NOITE">Noite</option>
@@ -380,8 +380,8 @@ const sincronizarSalas = async () => {
             </div>
           </div>
           <div class="mt-4 pt-4 border-t flex justify-end gap-2">
-            <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-            <button @click="salvarManual" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 shadow transition">Salvar Demanda</button>
+            <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 cursor-pointer rounded">Cancelar</button>
+            <button @click="salvarManual" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 cursor-pointer shadow transition">Salvar Demanda</button>
           </div>
         </div>
 
@@ -416,7 +416,7 @@ const sincronizarSalas = async () => {
               <div class="flex gap-2 ml-auto pl-4 border-l border-blue-200">
                 <button 
                   @click="aplicarLote(true)" 
-                  class="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded hover:bg-red-200 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  class="bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded hover:bg-red-200 cursor-pointer border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   :disabled="!loteBloco || !loteAndar || isLoading"
                   title="Bloqueia todas as salas listadas abaixo"
                 >
@@ -424,7 +424,7 @@ const sincronizarSalas = async () => {
                 </button>
                 <button 
                   @click="aplicarLote(false)" 
-                  class="bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded hover:bg-green-200 border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  class="bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded hover:bg-green-200 cursor-pointer border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   :disabled="!loteBloco || !loteAndar || isLoading"
                   title="Libera todas as salas listadas abaixo"
                 >
@@ -442,7 +442,7 @@ const sincronizarSalas = async () => {
               placeholder="🔍 Buscar sala por nome ou especialidade..." 
               class="border p-2 rounded w-80 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
             >
-            <button @click="sincronizarSalas" class="text-xs text-red-600 hover:text-red-800 underline">
+            <button @click="sincronizarSalas" class="text-xs text-red-600 hover:text-red-800 cursor-pointer underline">
               ⚠ Resetar para padrão
             </button>
           </div>
@@ -468,7 +468,7 @@ const sincronizarSalas = async () => {
                   <td class="p-3 text-center">
                     <button 
                       @click="toggleManutencao(sala)"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer"
                       :class="sala.is_maintenance ? 'bg-red-500' : 'bg-gray-200'"
                       :title="sala.is_maintenance ? 'Clique para liberar' : 'Clique para bloquear'"
                     >

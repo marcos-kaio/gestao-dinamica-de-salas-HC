@@ -212,12 +212,12 @@ onMounted(() => {
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Seu Nome</label>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nome do profissional de saúde</label>
                 <input v-model="medicoNome" type="text" placeholder="Ex: Dr. Carlos Silva" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white">
             </div>
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Especialidade</label>
-                <select v-model="especialidade" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-blue-500 bg-white outline-none">
+                <select v-model="especialidade" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-blue-500 bg-white outline-none cursor-pointer">
                     <option value="" disabled selected>Selecione...</option>
                     <option v-for="esp in especialidadesDisponiveis" :key="esp" :value="esp">{{ esp }}</option>
                 </select>
@@ -235,8 +235,8 @@ onMounted(() => {
 
       <!-- Tabs -->
       <div class="flex p-1 bg-gray-200 rounded-xl mb-8 shadow-inner">
-        <button @click="currentTab = 'checkin'; checkinMode = null; fetchSalasTempoReal()" :class="`flex-1 py-3 text-sm font-bold rounded-lg transition ${currentTab === 'checkin' ? 'bg-white text-blue-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`">Realizar Check-in</button>
-        <button @click="currentTab = 'checkout'; fetchSalasTempoReal()" :class="`flex-1 py-3 text-sm font-bold rounded-lg transition ${currentTab === 'checkout' ? 'bg-white text-blue-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`">Checkout / Salas Ocupadas</button>
+        <button @click="currentTab = 'checkin'; checkinMode = null; fetchSalasTempoReal()" :class="`flex-1 py-3 text-sm font-bold rounded-lg cursor-pointer transition ${currentTab === 'checkin' ? 'bg-white text-blue-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`">Realizar Check-in</button>
+        <button @click="currentTab = 'checkout'; fetchSalasTempoReal()" :class="`flex-1 py-3 text-sm font-bold rounded-lg cursor-pointer transition ${currentTab === 'checkout' ? 'bg-white text-blue-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`">Checkout / Salas Ocupadas</button>
       </div>
 
       <!-- CHECK-IN -->
@@ -259,7 +259,7 @@ onMounted(() => {
 
         <div v-if="checkinMode === 'manual'" class="animate-fade-in">
             <div class="flex justify-between items-center mb-4">
-                <button @click="checkinMode = null" class="text-gray-500 hover:text-blue-600 font-bold flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">← Voltar</button>
+                <button @click="checkinMode = null" class="text-gray-500 hover:text-blue-600 font-bold flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 cursor-pointer">← Voltar</button>
                 <span class="text-sm text-gray-500 font-medium">{{ salasLivres.length }} salas livres</span>
             </div>
             <div v-if="isLoading" class="text-center py-12">Carregando...</div>
@@ -277,7 +277,7 @@ onMounted(() => {
                         </div>
                         <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded border border-green-200">LIVRE</span>
                     </div>
-                    <button @click="handleManualCheckin(sala.sala_id)" class="w-full py-2.5 bg-white border border-blue-600 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-600 hover:text-white transition shadow-sm">Ocupar esta Sala</button>
+                    <button @click="handleManualCheckin(sala.sala_id)" class="w-full py-2.5 bg-white border border-blue-600 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-600 hover:text-white cursor-pointer transition shadow-sm">Ocupar esta Sala</button>
                 </div>
             </div>
         </div>
