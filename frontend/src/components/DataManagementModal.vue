@@ -203,8 +203,9 @@ const validarArquivo = (arquivo: File) => {
 
 const baixarModelo = () => {
   const csvContent = "data:text/csv;charset=utf-8," 
-    + "nome,nome_especialidade,dia_semana,turno,vinculo_descricao\n"
-    + "Dr. Teste,CARDIOLOGIA,2,MANHA,DOCENTE";
+    + "nome,nome_especialidade,dia_semana,turno,vinculo_descricao,ativa\n"
+    + "Dr. Teste,CARDIOLOGIA,2,MANHA,DOCENTE,TRUE\n"
+    + "Dr. Fulano,Pediatria,3,TARDE,DOCENTE,FALSE\n";
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);

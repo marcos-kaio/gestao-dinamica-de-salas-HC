@@ -207,6 +207,10 @@ def importar_grades_csv():
     
     try: 
         df = pd.read_csv(path)
+
+        # filtro de grades ativas
+        if 'ativa' in df.columns:
+            df = df[df['ativa'].astype(str).str.upper().str.strip() == 'TRUE']
         
         # remoção de duplicatas
         colunas_chave = {'nome', 'dia_semana', 'turno'}
