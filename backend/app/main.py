@@ -66,6 +66,11 @@ class TrocaSalaRequest(BaseModel):
 class SalaUpdate(BaseModel):
     is_maintenance: bool
 
+class SalaCreate(BaseModel):
+    bloco: str
+    andar: str
+    especialidade_preferencial: str = ""
+
 class LoteSalasUpdate(BaseModel):
     bloco: str
     andar: str
@@ -119,6 +124,47 @@ def ler_dashboard_tempo_real(db: Session = Depends(get_db)):
 @app.get("/api/salas")
 def listar_salas(db: Session = Depends(get_db)): return db.query(Sala).all()
 
+@app.post("/api/salas")
+def criar_sala_manual(dados: SalaCreate, db: Session = Depends(get_db)):
+    """Cria uma nova sala gerando ID sequencial automaticamente"""
+    # Busca salas existentes no setor para calcular sequência
+    salas_setor = db.query(Sala).filter(
+        Sala.bloco == dados.bloco,
+        Sala.andar == dados.andar
+    ).all()
+    
+    max_seq = 0
+    for sala in salas_setor:
+        try:
+            # Tenta extrair numero final
+            parts = sala.id.split('-')
+            if len(parts) > 1:
+                seq = int(parts[-1])
+                if seq > max_seq: max_seq = seq
+        except:
+            continue
+            
+    next_seq = max_seq + 1
+    new_id = f"{dados.bloco}{dados.andar}-{next_seq:02d}"
+    
+    if db.query(Sala).filter(Sala.id == new_id).first():
+        # Fallback simples se houver conflito
+        new_id = f"{dados.bloco}{dados.andar}-{next_seq+1:02d}"
+
+    nova_sala = Sala(
+        id=new_id,
+        nome_visual=new_id,
+        bloco=dados.bloco,
+        andar=dados.andar,
+        especialidade_preferencial=dados.especialidade_preferencial,
+        features=[],
+        is_maintenance=False
+    )
+    
+    db.add(nova_sala)
+    db.commit()
+    return {"message": "Sala criada com sucesso", "sala": new_id}
+
 @app.put("/api/salas/{sala_id}")
 def atualizar_status_sala(sala_id: str, dados: SalaUpdate, db: Session = Depends(get_db)):
     sala = db.query(Sala).filter(Sala.id == sala_id).first()
@@ -126,6 +172,18 @@ def atualizar_status_sala(sala_id: str, dados: SalaUpdate, db: Session = Depends
     sala.is_maintenance = dados.is_maintenance
     db.commit()
     return {"message": "Status atualizado"}
+
+@app.delete("/api/salas/{sala_id}")
+def excluir_sala(sala_id: str, db: Session = Depends(get_db)):
+    sala = db.query(Sala).filter(Sala.id == sala_id).first()
+    if not sala: raise HTTPException(404, "Sala não encontrada")
+    
+    # Remove alocações relacionadas para manter integridade
+    db.query(Alocacao).filter(Alocacao.sala_id == sala_id).delete()
+    
+    db.delete(sala)
+    db.commit()
+    return {"message": "Sala removida com sucesso"}
 
 @app.put("/api/salas/lote/update")
 def atualizar_salas_lote(dados: LoteSalasUpdate, db: Session = Depends(get_db)):
