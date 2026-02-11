@@ -92,26 +92,70 @@ def obter_resumo_atual(db: Session):
     return resumo
 
 def listar_opcoes_troca(alocacao_id: int, db: Session):
-    aloc = db.query(Alocacao).filter(Alocacao.id == alocacao_id).first()
-    if not aloc: return []
-    grade = db.query(Grade).filter(Grade.id == aloc.grade_id).first()
-    ocupadas = {id[0] for id in db.query(Alocacao.sala_id).filter(Alocacao.dia_semana == aloc.dia_semana, Alocacao.turno == aloc.turno).all()}
-    salas = db.query(Sala).filter(Sala.is_maintenance == False).all()
+    aloc_origem = db.query(Alocacao).filter(Alocacao.id == alocacao_id).first()
+    if not aloc_origem: return []
+    
+    grade_origem = db.query(Grade).filter(Grade.id == aloc_origem.grade_id).first()
+    
+    ocupacoes_concorrentes = db.query(Alocacao, Grade).join(Grade).filter(
+        Alocacao.dia_semana == aloc_origem.dia_semana,
+        Alocacao.turno == aloc_origem.turno
+    ).all()
+    
+    mapa_ocupacao = {a.sala_id: g.nome_profissional for a, g in ocupacoes_concorrentes}
+    todas_salas = db.query(Sala).filter(Sala.is_maintenance == False).all()
+    
     opcoes = []
-    for sala in salas:
-        if sala.id not in ocupadas or sala.id == aloc.sala_id:
-            score = calcular_score(grade, sala, {})
-            opcoes.append({"sala_id": sala.id, "nome": sala.nome_visual, "score": score, "recomendado": score > 0, "atual": sala.id == aloc.sala_id})
-    opcoes.sort(key=lambda x: (x['atual'], x['score']), reverse=True)
+    for sala in todas_salas:
+        ocupante = mapa_ocupacao.get(sala.id)
+        is_atual = (sala.id == aloc_origem.sala_id)
+        score = calcular_score(grade_origem, sala, {}) 
+        status = "LIVRE"
+        if is_atual: status = "ATUAL"
+        elif ocupante: status = f"OCUPADA ({ocupante})"
+        
+        opcoes.append({
+            "sala_id": sala.id,
+            "nome": sala.nome_visual,
+            "score": score,
+            "recomendado": score > 0,
+            "status": status,
+            "ocupada": bool(ocupante) and not is_atual,
+            "ocupante_nome": ocupante if not is_atual else None
+        })
+            
+    opcoes.sort(key=lambda x: (not x['ocupada'], x['recomendado'], x['score']), reverse=True)
     return opcoes
 
-def aplicar_troca_manual(alocacao_id: int, nova_sala_id: str, db: Session):
-    aloc = db.query(Alocacao).filter(Alocacao.id == alocacao_id).first()
-    if not aloc: return False
-    if db.query(Alocacao).filter(Alocacao.sala_id == nova_sala_id, Alocacao.dia_semana == aloc.dia_semana, Alocacao.turno == aloc.turno, Alocacao.id != alocacao_id).first(): return False
-    aloc.sala_id = nova_sala_id
+def aplicar_troca_manual(alocacao_id: int, nova_sala_id: str, forcar: bool, db: Session):
+    aloc_origem = db.query(Alocacao).filter(Alocacao.id == alocacao_id).first()
+    if not aloc_origem: return {"sucesso": False, "motivo": "Alocação original não encontrada"}
+    
+    # Guarda a sala antiga para mandar o outro profissional para lá
+    sala_anterior_id = aloc_origem.sala_id
+
+    # Verifica se a nova sala tem alguém
+    aloc_destino = db.query(Alocacao).filter(
+        Alocacao.sala_id == nova_sala_id,
+        Alocacao.dia_semana == aloc_origem.dia_semana,
+        Alocacao.turno == aloc_origem.turno,
+        Alocacao.id != alocacao_id
+    ).first()
+    
+    if aloc_destino:
+        if not forcar:
+            return {"sucesso": False, "motivo": "Sala ocupada"}
+        else:
+            aloc_destino.sala_id = sala_anterior_id
+            aloc_destino.score = 5000
+            db.add(aloc_destino)
+            
+    # Move o profissional origem para a nova sala
+    aloc_origem.sala_id = nova_sala_id
+    aloc_origem.score = 5000 
+    
     db.commit()
-    return True
+    return {"sucesso": True}
 
 # função de monitoramento
 def obter_dashboard_tempo_real(db: Session):
