@@ -27,87 +27,139 @@ const iniciarEdicao = async (alocacaoId: number) => {
   }
 }
 
-const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
+const salvarTroca = async (alocacaoId: number, novaSalaId: string, forcar = false) => {
+  if (!novaSalaId) return
+
   try {
     const res = await fetch(`http://localhost:8000/api/alocacao/${alocacaoId}/trocar`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ nova_sala_id: novaSalaId })
+      body: JSON.stringify({ nova_sala_id: novaSalaId, forcar: forcar })
     })
     
-    if(res.ok) {
+    if (res.ok) {
+      alert("Troca realizada com sucesso!")
       editandoId.value = null
       emit('updated')
+    } else if (res.status === 409) {
+      // Conflito detectado (sala ocupada)
+      if (confirm("⚠️ AVISO: Esta sala já está ocupada por outro profissional.\n\nDeseja FORÇAR a alocação? Isso removerá o ocupante atual da sala.")) {
+        // Tenta novamente com flag de força
+        salvarTroca(alocacaoId, novaSalaId, true)
+      } else {
+        // Cancela a seleção visualmente se o usuário desistir
+        iniciarEdicao(alocacaoId) 
+      }
+    } else {
+      alert("Erro ao realizar a troca.")
     }
   } catch (e) {
-    alert("Erro ao salvar troca")
+    alert("Erro de conexão.")
   }
 }
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+  <div v-if="isOpen" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" @click.self="$emit('close')">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
       
       <!-- Header -->
-      <div class="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+      <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
         <div>
           <h2 class="text-2xl font-bold text-gray-800">{{ data?.ambulatorio || 'Detalhes' }}</h2>
           <p class="text-sm text-gray-600">
             {{ data?.detalhes?.length || 0 }} alocações registradas
           </p>
         </div>
-        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700 cursor-pointer text-2xl">&times;</button>
+        <button @click="$emit('close')" class="text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer">&times;</button>
       </div>
 
       <!-- Body -->
       <div class="p-6 overflow-y-auto flex-1">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="text-xs font-bold text-gray-500 uppercase border-b">
-              <th class="pb-3 w-1/4">Dia/Turno</th>
-              <th class="pb-3 w-1/3">Profissional</th>
-              <th class="pb-3 w-1/4">Sala</th>
-              <th class="pb-3 text-right">Ações</th>
+            <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+              <th class="pb-4 pl-2">Dia / Turno</th>
+              <th class="pb-4">Profissional</th>
+              <th class="pb-4">Sala Atual</th>
+              <th class="pb-4 text-right pr-2">Ações</th>
             </tr>
           </thead>
           <tbody class="text-sm">
-            <tr v-for="item in data?.detalhes" :key="item.alocacao_id" class="border-b hover:bg-gray-50 group">
-              <td class="py-3 font-medium text-gray-700">
-                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs border border-blue-100">
-                  {{ item.dia }} - {{ item.turno }}
-                </span>
-              </td>
-              <td class="py-3 text-gray-800 font-medium truncate max-w-[200px]" :title="item.medico">
-                {{ item.medico }}
-              </td>
+            <tr v-for="item in data?.detalhes || []" :key="item.alocacao_id" class="border-b border-gray-50 hover:bg-blue-50/50 transition-colors group">
               
-              <td class="py-3">
-                <div v-if="editandoId === item.alocacao_id" class="relative">
-                  <select 
-                    class="border rounded px-2 py-1 w-full text-xs bg-white focus:ring-2 focus:ring-blue-500"
-                    @change="salvarTroca(item.alocacao_id, ($event.target as HTMLSelectElement).value)"
-                  >
-                    <option disabled selected>Selecione...</option>
-                    <option v-for="opt in salasDisponiveis" :key="opt.sala_id" :value="opt.sala_id">
-                      {{ opt.nome }} {{ opt.recomendado ? '⭐' : '' }}
-                    </option>
-                  </select>
-                  <div v-if="loadingSalas" class="text-[10px] text-gray-400 mt-1">Carregando salas...</div>
-                </div>
-                <div v-else class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                  {{ item.sala }}
+              <!-- Dia/Turno -->
+              <td class="py-4 pl-2 font-medium text-gray-600">
+                <div class="flex items-center gap-2">
+                  <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-200">
+                    {{ item.dia }}
+                  </span>
+                  <span class="text-xs text-gray-500">{{ item.turno }}</span>
                 </div>
               </td>
 
-              <td class="py-3 text-right">
+              <!-- Médico -->
+              <td class="py-4 text-gray-800 font-semibold">
+                {{ item.medico }}
+              </td>
+              
+              <!-- Sala (Visualização ou Edição) -->
+              <td class="py-4">
+                
+                <!-- Modo Edição -->
+                <div v-if="editandoId === item.alocacao_id" class="relative w-full max-w-md">
+                  <select 
+                    class="border border-blue-300 rounded-lg px-3 py-2 w-full text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                    @change="salvarTroca(item.alocacao_id, ($event.target as HTMLSelectElement).value)"
+                  >
+                    <option disabled selected>Selecione uma nova sala...</option>
+                    
+                    <!-- Opções Livres -->
+                    <optgroup label="✅ Salas Livres">
+                      <option 
+                        v-for="opt in salasDisponiveis.filter(s => !s.ocupada)" 
+                        :key="opt.sala_id" 
+                        :value="opt.sala_id"
+                        class="text-gray-800"
+                      >
+                        {{ opt.nome }} {{ opt.recomendado ? '⭐ (Recomendada)' : '' }}
+                      </option>
+                    </optgroup>
+
+                    <!-- Opções Ocupadas (Para Troca Forçada) -->
+                    <optgroup label="⚠️ Salas Ocupadas (Requer Confirmação)">
+                      <option 
+                        v-for="opt in salasDisponiveis.filter(s => s.ocupada)" 
+                        :key="opt.sala_id" 
+                        :value="opt.sala_id"
+                        class="text-red-600 bg-red-50"
+                      >
+                        {{ opt.nome }} — {{ opt.status }}
+                      </option>
+                    </optgroup>
+
+                  </select>
+                  
+                  <div v-if="loadingSalas" class="absolute right-3 top-2.5">
+                    <div class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                  </div>
+                </div>
+
+                <!-- Modo Visualização -->
+                <div v-else class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></span>
+                  <span class="font-bold text-gray-700">{{ item.sala }}</span>
+                </div>
+              </td>
+
+              <!-- Botões -->
+              <td class="py-4 text-right pr-2">
                 <button 
                   v-if="editandoId !== item.alocacao_id"
                   @click="iniciarEdicao(item.alocacao_id)"
-                  class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer text-xs px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition"
+                  class="text-blue-600 hover:text-white hover:bg-blue-600 font-medium text-xs px-3 py-1.5 border border-blue-200 rounded-lg transition-all shadow-sm cursor-pointer"
                 >
-                  Trocar
+                  Mudar Sala
                 </button>
                 <button 
                   v-else 
@@ -129,3 +181,8 @@ const salvarTroca = async (alocacaoId: number, novaSalaId: string) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.animate-fade-in { animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+</style>

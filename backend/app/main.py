@@ -62,6 +62,7 @@ class NovaDemanda(BaseModel):
 
 class TrocaSalaRequest(BaseModel):
     nova_sala_id: str
+    forcar: bool = False
 
 class SalaUpdate(BaseModel):
     is_maintenance: bool
@@ -192,6 +193,14 @@ def atualizar_salas_lote(dados: LoteSalasUpdate, db: Session = Depends(get_db)):
     for s in salas: s.is_maintenance = dados.is_maintenance
     db.commit()
     return {"message": "Setor atualizado", "afetados": len(salas)}
+@app.delete("/api/salas/{sala_id}")
+def excluir_sala(sala_id: str, db: Session = Depends(get_db)):
+    sala = db.query(Sala).filter(Sala.id == sala_id).first()
+    if not sala: raise HTTPException(404, "Sala não encontrada")
+    db.query(Alocacao).filter(Alocacao.sala_id == sala_id).delete()
+    db.delete(sala)
+    db.commit()
+    return {"message": "Removida"}
 
 # --- Gestão Manual ---
 @app.get("/api/alocacao/{alocacao_id}/opcoes")
@@ -200,8 +209,15 @@ def obter_opcoes_troca(alocacao_id: int, db: Session = Depends(get_db)):
 
 @app.put("/api/alocacao/{alocacao_id}/trocar")
 def realizar_troca_manual(alocacao_id: int, req: TrocaSalaRequest, db: Session = Depends(get_db)):
-    if aplicar_troca_manual(alocacao_id, req.nova_sala_id, db): return {"message": "Sucesso"}
-    raise HTTPException(400, "Erro na troca")
+    resultado = aplicar_troca_manual(alocacao_id, req.nova_sala_id, req.forcar, db)
+    
+    if resultado["sucesso"]:
+        return {"message": "Troca realizada com sucesso"}
+    
+    if resultado.get("motivo") == "Sala ocupada":
+        raise HTTPException(status_code=409, detail=f"Sala ocupada. Deseja forçar?")
+        
+    raise HTTPException(400, "Erro desconhecido na troca")
 
 @app.post("/api/grade/adicionar")
 def adicionar_demanda_manual(demanda: NovaDemanda, db: Session = Depends(get_db)):
