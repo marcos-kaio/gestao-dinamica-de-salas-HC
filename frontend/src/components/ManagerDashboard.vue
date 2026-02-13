@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import ManagerDetailsModal from './ManagerDetailsModal.vue'
 import DataManagementModal from './DataManagementModal.vue'
 
@@ -18,12 +19,28 @@ const modalGestaoAberto = ref(false)
 const itemSelecionado = ref<ResumoAmbulatorio | null>(null)
 
 const API_URL = 'http://localhost:8000/api'
+const authStore = useAuthStore() // Usar store
+
+// Helper para fetch com auth
+const authFetch = async (url: string, options: RequestInit = {}) => {
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${authStore.token}`,
+    'Content-Type': 'application/json'
+  }
+  const res = await fetch(url, { ...options, headers })
+  if (res.status === 401) {
+    authStore.logout()
+    return null
+  }
+  return res
+}
 
 const carregarEstadoAtual = async () => {
   loading.value = true
   try {
-    const res = await fetch(`${API_URL}/alocacao/resumo`)
-    if (res.ok) {
+    const res = await authFetch(`${API_URL}/alocacao/resumo`)
+    if (res && res.ok) {
       alocacaoResumo.value = await res.json()
     }
   } catch (err) {
@@ -36,9 +53,11 @@ const carregarEstadoAtual = async () => {
 const gerarAlocacao = async () => {
   loading.value = true
   try {
-    const response = await fetch(`${API_URL}/alocacao/gerar`, { method: 'POST' })
-    const data = await response.json()
-    if (data.resumo_executivo) alocacaoResumo.value = data.resumo_executivo
+    const response = await authFetch(`${API_URL}/alocacao/gerar`, { method: 'POST' })
+    if (response && response.ok) {
+        const data = await response.json()
+        if (data.resumo_executivo) alocacaoResumo.value = data.resumo_executivo
+    }
   } finally {
     loading.value = false
   }
