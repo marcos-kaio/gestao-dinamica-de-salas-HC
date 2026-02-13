@@ -7,6 +7,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    # Carrega as variáveis do arquivo .env da raiz
+    env_file:
+      - .env
     environment:
       - TZ=America/Recife
 

@@ -1,12 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import shutil
 import os
-from datetime import datetime
-import pytz
+from datetime import timedelta
 
 from app.database import engine, Base, get_db, SessionLocal
 from app.models import Sala, Grade, Alocacao, Especialidade
@@ -19,6 +19,8 @@ from app.core.optimizer import (
     obter_dashboard_tempo_real
 )
 from app.core.time import get_horario_atual
+from app.core.security import create_access_token, get_current_user
+from app.core.config import settings
 
 Base.metadata.create_all(bind=engine)
 
@@ -36,11 +38,9 @@ async def lifespan(app: FastAPI):
         print(f"Erro no Auto-Seed: {e}")
     finally:
         db.close()
-    
     yield
-    # Executa ao desligar (se necessário)
 
-app = FastAPI(title="GDS - Gestão Dinâmica de Salas", lifespan=lifespan)
+app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 origins = ["*"]
 
@@ -82,18 +82,34 @@ class CheckInRequest(BaseModel):
     especialidade: str
     sala_id: str
 
+# --- AUTHENTICATION ---
+@app.post("/api/auth/login")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    if form_data.username == settings.ADMIN_USERNAME and form_data.password == settings.ADMIN_PASSWORD:
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": form_data.username}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer", "user": {"name": "Administrador", "role": "admin"}}
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Usuário ou senha incorretos",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
 @app.get("/")
 def read_root():
     return {"message": "API GDS Online", "status": "OK"}
 
 # --- Setup ---
-@app.post("/api/setup/importar-salas")
+@app.post("/api/setup/importar-salas", dependencies=[Depends(get_current_user)])
 def trigger_import_salas(): return importar_salas_csv()
 
-@app.post("/api/setup/importar-grades")
+@app.post("/api/setup/importar-grades", dependencies=[Depends(get_current_user)])
 def trigger_import_grades_local(): return importar_grades_csv()
 
-@app.post("/api/upload/grades")
+@app.post("/api/upload/grades", dependencies=[Depends(get_current_user)])
 async def upload_grades_csv(file: UploadFile = File(...)):
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -108,12 +124,12 @@ async def upload_grades_csv(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Core ---
-@app.post("/api/alocacao/gerar")
+@app.post("/api/alocacao/gerar", dependencies=[Depends(get_current_user)])
 def trigger_alocacao_inteligente(db: Session = Depends(get_db)):
     res = gerar_alocacao_grade(db)
     return {"status": "OK", "resumo_executivo": res["resumo_ambulatorios"]}
 
-@app.get("/api/alocacao/resumo")
+@app.get("/api/alocacao/resumo", dependencies=[Depends(get_current_user)])
 def ler_alocacao_atual(db: Session = Depends(get_db)):
     return obter_resumo_atual(db)
 
@@ -121,11 +137,11 @@ def ler_alocacao_atual(db: Session = Depends(get_db)):
 def ler_dashboard_tempo_real(db: Session = Depends(get_db)):
     return obter_dashboard_tempo_real(db)
 
-# --- Salas ---
-@app.get("/api/salas")
+# --- Salas (Protegido) ---
+@app.get("/api/salas", dependencies=[Depends(get_current_user)])
 def listar_salas(db: Session = Depends(get_db)): return db.query(Sala).all()
 
-@app.post("/api/salas")
+@app.post("/api/salas", dependencies=[Depends(get_current_user)])
 def criar_sala_manual(dados: SalaCreate, db: Session = Depends(get_db)):
     """Cria uma nova sala gerando ID sequencial automaticamente"""
     # Busca salas existentes no setor para calcular sequência
@@ -142,9 +158,7 @@ def criar_sala_manual(dados: SalaCreate, db: Session = Depends(get_db)):
             if len(parts) > 1:
                 seq = int(parts[-1])
                 if seq > max_seq: max_seq = seq
-        except:
-            continue
-            
+        except: continue
     next_seq = max_seq + 1
     new_id = f"{dados.bloco}{dados.andar}-{next_seq:02d}"
     
@@ -166,7 +180,7 @@ def criar_sala_manual(dados: SalaCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Sala criada com sucesso", "sala": new_id}
 
-@app.put("/api/salas/{sala_id}")
+@app.put("/api/salas/{sala_id}", dependencies=[Depends(get_current_user)])
 def atualizar_status_sala(sala_id: str, dados: SalaUpdate, db: Session = Depends(get_db)):
     sala = db.query(Sala).filter(Sala.id == sala_id).first()
     if not sala: raise HTTPException(404, "Sala não encontrada")
@@ -174,26 +188,15 @@ def atualizar_status_sala(sala_id: str, dados: SalaUpdate, db: Session = Depends
     db.commit()
     return {"message": "Status atualizado"}
 
-@app.delete("/api/salas/{sala_id}")
-def excluir_sala(sala_id: str, db: Session = Depends(get_db)):
-    sala = db.query(Sala).filter(Sala.id == sala_id).first()
-    if not sala: raise HTTPException(404, "Sala não encontrada")
-    
-    # Remove alocações relacionadas para manter integridade
-    db.query(Alocacao).filter(Alocacao.sala_id == sala_id).delete()
-    
-    db.delete(sala)
-    db.commit()
-    return {"message": "Sala removida com sucesso"}
-
-@app.put("/api/salas/lote/update")
+@app.put("/api/salas/lote/update", dependencies=[Depends(get_current_user)])
 def atualizar_salas_lote(dados: LoteSalasUpdate, db: Session = Depends(get_db)):
     salas = db.query(Sala).filter(Sala.bloco == dados.bloco, Sala.andar == dados.andar).all()
     if not salas: raise HTTPException(404, "Nenhuma sala encontrada")
     for s in salas: s.is_maintenance = dados.is_maintenance
     db.commit()
     return {"message": "Setor atualizado", "afetados": len(salas)}
-@app.delete("/api/salas/{sala_id}")
+
+@app.delete("/api/salas/{sala_id}", dependencies=[Depends(get_current_user)])
 def excluir_sala(sala_id: str, db: Session = Depends(get_db)):
     sala = db.query(Sala).filter(Sala.id == sala_id).first()
     if not sala: raise HTTPException(404, "Sala não encontrada")
@@ -203,11 +206,11 @@ def excluir_sala(sala_id: str, db: Session = Depends(get_db)):
     return {"message": "Removida"}
 
 # --- Gestão Manual ---
-@app.get("/api/alocacao/{alocacao_id}/opcoes")
+@app.get("/api/alocacao/{alocacao_id}/opcoes", dependencies=[Depends(get_current_user)])
 def obter_opcoes_troca(alocacao_id: int, db: Session = Depends(get_db)):
     return listar_opcoes_troca(alocacao_id, db)
 
-@app.put("/api/alocacao/{alocacao_id}/trocar")
+@app.put("/api/alocacao/{alocacao_id}/trocar", dependencies=[Depends(get_current_user)])
 def realizar_troca_manual(alocacao_id: int, req: TrocaSalaRequest, db: Session = Depends(get_db)):
     resultado = aplicar_troca_manual(alocacao_id, req.nova_sala_id, req.forcar, db)
     
@@ -219,7 +222,7 @@ def realizar_troca_manual(alocacao_id: int, req: TrocaSalaRequest, db: Session =
         
     raise HTTPException(400, "Erro desconhecido na troca")
 
-@app.post("/api/grade/adicionar")
+@app.post("/api/grade/adicionar", dependencies=[Depends(get_current_user)])
 def adicionar_demanda_manual(demanda: NovaDemanda, db: Session = Depends(get_db)):
     db.add(Grade(
         nome_profissional=demanda.medico_nome,
@@ -286,9 +289,7 @@ def realizar_checkout(sala_id: str, db: Session = Depends(get_db)):
     
     # Remove alocação ativa neste turno/dia
     alocacao = db.query(Alocacao).filter(
-        Alocacao.sala_id == sala_id,
-        Alocacao.dia_semana == dia,
-        Alocacao.turno == turno
+        Alocacao.sala_id == sala_id, Alocacao.dia_semana == dia, Alocacao.turno == turno
     ).first()
     
     if not alocacao:
@@ -297,8 +298,7 @@ def realizar_checkout(sala_id: str, db: Session = Depends(get_db)):
         
     db.delete(alocacao)
     db.commit()
-    
     return {"message": "Sala liberada com sucesso"}
 
-@app.get("/api/alocacoes")
+@app.get("/api/alocacoes", dependencies=[Depends(get_current_user)])
 def listar_alocacoes_finais(db: Session = Depends(get_db)): return db.query(Alocacao).all()
